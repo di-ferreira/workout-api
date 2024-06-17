@@ -6,12 +6,14 @@ import { iEquipmentRepository } from '../../../../core/Repositories/iEquipment.R
 import CreateEquipmentsUseCase from '../../../../core/UseCases/Equipment/CreateEquipment';
 import FindByIdEquipmentsUseCase from '../../../../core/UseCases/Equipment/FindByIDEquipment';
 import ListEquipmentsUseCase from '../../../../core/UseCases/Equipment/ListEquipments';
+import UpdateEquipmentsUseCase from '../../../../core/UseCases/Equipment/UpdateEquipment';
 import AppError from '../../../http/ErrorHandlers';
 
 export class EquipmentController {
   private listUseCase: ListEquipmentsUseCase;
   private findUseCase: FindByIdEquipmentsUseCase;
   private createUseCase: CreateEquipmentsUseCase;
+  private updateUseCase: UpdateEquipmentsUseCase;
   private repository: iEquipmentRepository;
 
   constructor() {
@@ -19,9 +21,11 @@ export class EquipmentController {
     this.listUseCase = new ListEquipmentsUseCase(this.repository);
     this.findUseCase = new FindByIdEquipmentsUseCase(this.repository);
     this.createUseCase = new CreateEquipmentsUseCase(this.repository);
+    this.updateUseCase = new UpdateEquipmentsUseCase(this.repository);
     this.list = this.list.bind(this);
     this.show = this.show.bind(this);
     this.create = this.create.bind(this);
+    this.save = this.save.bind(this);
   }
 
   async list(req: Request, res: Response): Promise<Response> {
@@ -94,6 +98,36 @@ export class EquipmentController {
       };
       const result = await this.createUseCase.execute(newEquipment);
       return res.status(STATUS_CODE.CREATED).json({ result });
+    } catch (e) {
+      console.error('Error controller: ' + e);
+
+      if (e instanceof AppError) {
+        return res.status(e.statusCode).send({ error: e.message });
+      } else if (e instanceof Error) {
+        return res
+          .status(STATUS_CODE.INTERNAL_SERVER_ERROR)
+          .send({ error: e.message });
+      } else {
+        return res
+          .status(STATUS_CODE.INTERNAL_SERVER_ERROR)
+          .send({ error: String(e) });
+      }
+    }
+  }
+
+  async save(req: Request, res: Response): Promise<Response> {
+    const { id } = req.params;
+    try {
+      const { name, description_name } = req.body;
+      const newEquipment: iEquipment = {
+        id: Number(id),
+        name,
+        description_name,
+      };
+
+      const result = await this.updateUseCase.execute(newEquipment);
+
+      return res.status(STATUS_CODE.SUCCESS).json({ result });
     } catch (e) {
       console.error('Error controller: ' + e);
 
