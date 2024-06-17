@@ -1,5 +1,5 @@
-import { iExercise } from '@/core/Entities/Exercise';
-import { iExerciceRepository } from '@/core/Repositories/iExercise.Repository';
+import { iExercise } from 'src/core/Entities/Exercise';
+import { iExerciceRepository } from 'src/core/Repositories/iExercise.Repository';
 
 export default class ListExerciseUseCase {
   private exerciceRepository: iExerciceRepository;

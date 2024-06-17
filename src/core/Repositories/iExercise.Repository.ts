@@ -1,4 +1,4 @@
-import { iExercise } from '@/core/Entities/Exercise';
+import { iExercise } from '../Entities/Exercise';
 
 export interface iExerciceRepository {
   findAll(params?: SearchParams): Promise<iList<iExercise>>;

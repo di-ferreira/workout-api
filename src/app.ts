@@ -1,4 +1,4 @@
-import AppDataSource from './infra/database/typeorm/AppDataSource';
+import { AppDataSource } from './infra/database/typeorm/AppDataSource';
 import { initServer } from './infra/http/server';
 
 AppDataSource.initialize()
@@ -7,5 +7,12 @@ AppDataSource.initialize()
 
     initServer();
   })
-  .catch((error) => console.log('Error -> ', error));
+  .catch((error: any) => {
+    console.error('Error controller: ' + error);
+    if (error instanceof Error) {
+      console.error('Error ->', error.message);
+    } else {
+      console.error('Error ->', String(error));
+    }
+  });
 
