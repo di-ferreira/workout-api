@@ -6,5 +6,6 @@ const EquipmentRoutes = Router();
 const controller = new EquipmentController();
 
 EquipmentRoutes.get('', controller.list);
+EquipmentRoutes.post('', controller.create);
 
 export default EquipmentRoutes;

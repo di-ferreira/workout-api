@@ -11,6 +11,10 @@ export class EquipmentRepository implements iEquipmentRepository {
     this.CustomRepository = AppDataSource.getRepository(Equipment);
   }
 
+  findByName(name: string): Promise<iEquipment | null> {
+    throw new Error('Method not implemented.');
+  }
+
   async findAll({ page, limit }: SearchParams): Promise<iList<iEquipment>> {
     const queryPage: number = page ? page : 1;
     const queryLimit: number = limit ? limit : 10;
@@ -33,13 +37,19 @@ export class EquipmentRepository implements iEquipmentRepository {
   findById(id: number): Promise<iEquipment | null> {
     throw new Error('Method not implemented.');
   }
-  createExercice(equipment: iEquipment): Promise<iEquipment> {
+
+  async createEquipment(equipment: iEquipment): Promise<iEquipment> {
+    const newEquipment = this.CustomRepository.create({
+      name: equipment.name,
+      description_name: equipment.description_name,
+    });
+    const result = await this.CustomRepository.save(newEquipment);
+    return result;
+  }
+  saveEquipment(equipment: iEquipment): Promise<iEquipment> {
     throw new Error('Method not implemented.');
   }
-  saveExercice(equipment: iEquipment): Promise<iEquipment> {
-    throw new Error('Method not implemented.');
-  }
-  deleteExercice(equipment: iEquipment): Promise<void> {
+  deleteEquipment(equipment: iEquipment): Promise<void> {
     throw new Error('Method not implemented.');
   }
 }

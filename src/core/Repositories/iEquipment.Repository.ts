@@ -5,9 +5,11 @@ export interface iEquipmentRepository {
 
   findById(id: number): Promise<iEquipment | null>;
 
-  createExercice(equipment: iEquipment): Promise<iEquipment>;
+  findByName(name: string): Promise<iEquipment | null>;
 
-  saveExercice(equipment: iEquipment): Promise<iEquipment>;
+  createEquipment(equipment: iEquipment): Promise<iEquipment>;
 
-  deleteExercice(equipment: iEquipment): Promise<void>;
+  saveEquipment(equipment: iEquipment): Promise<iEquipment>;
+
+  deleteEquipment(equipment: iEquipment): Promise<void>;
 }
