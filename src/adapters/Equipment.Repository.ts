@@ -34,8 +34,8 @@ export class EquipmentRepository implements iEquipmentRepository {
     return result;
   }
 
-  findById(id: number): Promise<iEquipment | null> {
-    throw new Error('Method not implemented.');
+  async findById(id: number): Promise<iEquipment | null> {
+    return await this.CustomRepository.findOneBy({ id });
   }
 
   async createEquipment(equipment: iEquipment): Promise<iEquipment> {

@@ -4,19 +4,23 @@ import { EquipmentRepository } from '../../../../adapters/Equipment.Repository';
 import { iEquipment } from '../../../../core/Entities/Equipment';
 import { iEquipmentRepository } from '../../../../core/Repositories/iEquipment.Repository';
 import CreateEquipmentsUseCase from '../../../../core/UseCases/Equipment/CreateEquipment';
+import FindByIdEquipmentsUseCase from '../../../../core/UseCases/Equipment/FindByIDEquipment';
 import ListEquipmentsUseCase from '../../../../core/UseCases/Equipment/ListEquipments';
 import AppError from '../../../http/ErrorHandlers';
 
 export class EquipmentController {
   private listUseCase: ListEquipmentsUseCase;
+  private findUseCase: FindByIdEquipmentsUseCase;
   private createUseCase: CreateEquipmentsUseCase;
   private repository: iEquipmentRepository;
 
   constructor() {
     this.repository = new EquipmentRepository();
     this.listUseCase = new ListEquipmentsUseCase(this.repository);
+    this.findUseCase = new FindByIdEquipmentsUseCase(this.repository);
     this.createUseCase = new CreateEquipmentsUseCase(this.repository);
     this.list = this.list.bind(this);
+    this.show = this.show.bind(this);
     this.create = this.create.bind(this);
   }
 
@@ -34,6 +38,35 @@ export class EquipmentController {
       }
 
       return res.status(STATUS_CODE.SUCCESS).json(listEquipment);
+    } catch (e) {
+      console.error('Error controller: ' + e);
+
+      if (e instanceof AppError) {
+        return res.status(e.statusCode).send({ error: e.message });
+      } else if (e instanceof Error) {
+        return res
+          .status(STATUS_CODE.INTERNAL_SERVER_ERROR)
+          .send({ error: e.message });
+      } else {
+        return res
+          .status(STATUS_CODE.INTERNAL_SERVER_ERROR)
+          .send({ error: String(e) });
+      }
+    }
+  }
+
+  async show(req: Request, res: Response): Promise<Response> {
+    const { id } = req.params;
+    try {
+      const equipment = await this.findUseCase.execute(Number(id));
+
+      if (!equipment) {
+        return res
+          .status(STATUS_CODE.NOT_FOUND)
+          .json({ result: 'Equipamento não encontrado' });
+      }
+
+      return res.status(STATUS_CODE.SUCCESS).json(equipment);
     } catch (e) {
       console.error('Error controller: ' + e);
 

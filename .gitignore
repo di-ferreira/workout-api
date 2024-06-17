@@ -6,5 +6,6 @@ tmp/
 temp/
 /.env
 /*.lock
-/src/infra/database/workoutDB.sqlite-shm
-/src/infra/database/workoutDB.sqlite-wal
+/src/**/*.sqlite-shm
+/src/**/*.sqlite-wal
+/src/**/*.sqlite

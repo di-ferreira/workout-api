@@ -7,5 +7,6 @@ const controller = new EquipmentController();
 
 EquipmentRoutes.get('', controller.list);
 EquipmentRoutes.post('', controller.create);
+EquipmentRoutes.get('/:id', controller.show);
 
 export default EquipmentRoutes;
