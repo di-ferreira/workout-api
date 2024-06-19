@@ -56,8 +56,7 @@ export class EquipmentRepository implements iEquipmentRepository {
     return result;
   }
 
-  deleteEquipment(equipment: iEquipment): Promise<void> {
-    //!TODO
-    throw new Error('Method not implemented.');
+  async deleteEquipment(equipment: iEquipment): Promise<void> {
+    await this.CustomRepository.delete(equipment.id!);
   }
 }

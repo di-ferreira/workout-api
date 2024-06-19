@@ -9,5 +9,6 @@ EquipmentRoutes.get('', controller.list);
 EquipmentRoutes.post('', controller.create);
 EquipmentRoutes.get('/:id', controller.show);
 EquipmentRoutes.put('/:id', controller.save);
+EquipmentRoutes.delete('/:id', controller.remove);
 
 export default EquipmentRoutes;

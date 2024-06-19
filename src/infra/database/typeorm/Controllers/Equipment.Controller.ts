@@ -4,6 +4,7 @@ import { EquipmentRepository } from '../../../../adapters/Equipment.Repository';
 import { iEquipment } from '../../../../core/Entities/Equipment';
 import { iEquipmentRepository } from '../../../../core/Repositories/iEquipment.Repository';
 import CreateEquipmentsUseCase from '../../../../core/UseCases/Equipment/CreateEquipment';
+import DeleteEquipmentsUseCase from '../../../../core/UseCases/Equipment/DeleteEquipment';
 import FindByIdEquipmentsUseCase from '../../../../core/UseCases/Equipment/FindByIDEquipment';
 import ListEquipmentsUseCase from '../../../../core/UseCases/Equipment/ListEquipments';
 import UpdateEquipmentsUseCase from '../../../../core/UseCases/Equipment/UpdateEquipment';
@@ -14,6 +15,7 @@ export class EquipmentController {
   private findUseCase: FindByIdEquipmentsUseCase;
   private createUseCase: CreateEquipmentsUseCase;
   private updateUseCase: UpdateEquipmentsUseCase;
+  private removeUseCase: DeleteEquipmentsUseCase;
   private repository: iEquipmentRepository;
 
   constructor() {
@@ -22,10 +24,12 @@ export class EquipmentController {
     this.findUseCase = new FindByIdEquipmentsUseCase(this.repository);
     this.createUseCase = new CreateEquipmentsUseCase(this.repository);
     this.updateUseCase = new UpdateEquipmentsUseCase(this.repository);
+    this.removeUseCase = new DeleteEquipmentsUseCase(this.repository);
     this.list = this.list.bind(this);
     this.show = this.show.bind(this);
     this.create = this.create.bind(this);
     this.save = this.save.bind(this);
+    this.remove = this.remove.bind(this);
   }
 
   async list(req: Request, res: Response): Promise<Response> {
@@ -128,6 +132,38 @@ export class EquipmentController {
       const result = await this.updateUseCase.execute(newEquipment);
 
       return res.status(STATUS_CODE.SUCCESS).json({ result });
+    } catch (e) {
+      console.error('Error controller: ' + e);
+
+      if (e instanceof AppError) {
+        return res.status(e.statusCode).send({ error: e.message });
+      } else if (e instanceof Error) {
+        return res
+          .status(STATUS_CODE.INTERNAL_SERVER_ERROR)
+          .send({ error: e.message });
+      } else {
+        return res
+          .status(STATUS_CODE.INTERNAL_SERVER_ERROR)
+          .send({ error: String(e) });
+      }
+    }
+  }
+
+  async remove(req: Request, res: Response): Promise<Response> {
+    const { id } = req.params;
+    try {
+      const equipment = await this.findUseCase.execute(Number(id));
+
+      if (!equipment) {
+        return res
+          .status(STATUS_CODE.NOT_FOUND)
+          .json({ result: 'Equipamento não encontrado' });
+      }
+      await this.removeUseCase.execute(equipment);
+
+      return res
+        .status(STATUS_CODE.SUCCESS)
+        .json({ result: 'Success removed Equipment!' });
     } catch (e) {
       console.error('Error controller: ' + e);
 
