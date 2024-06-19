@@ -9,6 +9,8 @@
       "emitDecoratorMetadata": true,
       "experimentalDecorators": true,
       "strict": true,
+      "resolveJsonModule": true,
+      "skipLibCheck": true,
       "paths": {
          "@/*": [
             "./src/*"
@@ -16,10 +18,11 @@
       }
    },
    "include": [
-      "src"
+      "./src"
    ],
    "exclude": [
       "node_modules",
-      "**/*.spec.ts"
+      "**/*.spec.ts",
+      "./tests"
    ]
 }
