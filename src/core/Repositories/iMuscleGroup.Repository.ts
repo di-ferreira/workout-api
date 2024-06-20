@@ -1,15 +1,15 @@
 import { iCreateMuscleGroup, iMuscleGroup } from '../Entities/iMuscleGroup';
 
 export interface iMuscleGroupRepository {
-  //   findAll(params?: SearchParams): Promise<iList<iEquipment>>;
+  findAll(params?: SearchParams): Promise<iList<iMuscleGroup>>;
 
-  //   findById(id: number): Promise<iEquipment | null>;
+  findById(id: number): Promise<iMuscleGroup | null>;
 
   findByName(params: iCreateMuscleGroup): Promise<iMuscleGroup[]>;
 
   createMuscleGroup(muscleGroup: iMuscleGroup): Promise<iMuscleGroup>;
 
-  //   saveEquipment(equipment: iEquipment): Promise<iEquipment>;
+  saveMuscleGroup(muscleGroup: iMuscleGroup): Promise<iMuscleGroup>;
 
-  //   deleteEquipment(equipment: iEquipment): Promise<void>;
+  deleteMuscleGroup(muscleGroup: iMuscleGroup): Promise<void>;
 }
