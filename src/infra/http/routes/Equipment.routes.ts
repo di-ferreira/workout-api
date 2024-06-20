@@ -5,10 +5,10 @@ const EquipmentRoutes = Router();
 
 const controller = new EquipmentController();
 
-EquipmentRoutes.get('', controller.list);
-EquipmentRoutes.post('', controller.create);
 EquipmentRoutes.get('/:id', controller.show);
 EquipmentRoutes.put('/:id', controller.save);
 EquipmentRoutes.delete('/:id', controller.remove);
+EquipmentRoutes.get('', controller.list);
+EquipmentRoutes.post('', controller.create);
 
 export default EquipmentRoutes;

@@ -6,6 +6,7 @@ import { iEquipmentRepository } from '../../../../core/Repositories/iEquipment.R
 import CreateEquipmentsUseCase from '../../../../core/UseCases/Equipment/CreateEquipment';
 import DeleteEquipmentsUseCase from '../../../../core/UseCases/Equipment/DeleteEquipment';
 import FindByIdEquipmentsUseCase from '../../../../core/UseCases/Equipment/FindByIDEquipment';
+import FindByNameEquipmentUseCase from '../../../../core/UseCases/Equipment/FindByNameEquipment';
 import ListEquipmentsUseCase from '../../../../core/UseCases/Equipment/ListEquipments';
 import UpdateEquipmentsUseCase from '../../../../core/UseCases/Equipment/UpdateEquipment';
 import AppError from '../../../http/ErrorHandlers';
@@ -13,6 +14,7 @@ import AppError from '../../../http/ErrorHandlers';
 export class EquipmentController {
   private listUseCase: ListEquipmentsUseCase;
   private findUseCase: FindByIdEquipmentsUseCase;
+  private findByNameUseCase: FindByNameEquipmentUseCase;
   private createUseCase: CreateEquipmentsUseCase;
   private updateUseCase: UpdateEquipmentsUseCase;
   private removeUseCase: DeleteEquipmentsUseCase;
@@ -22,6 +24,7 @@ export class EquipmentController {
     this.repository = new EquipmentRepository();
     this.listUseCase = new ListEquipmentsUseCase(this.repository);
     this.findUseCase = new FindByIdEquipmentsUseCase(this.repository);
+    this.findByNameUseCase = new FindByNameEquipmentUseCase(this.repository);
     this.createUseCase = new CreateEquipmentsUseCase(this.repository);
     this.updateUseCase = new UpdateEquipmentsUseCase(this.repository);
     this.removeUseCase = new DeleteEquipmentsUseCase(this.repository);
@@ -65,8 +68,16 @@ export class EquipmentController {
 
   async show(req: Request, res: Response): Promise<Response> {
     const { id } = req.params;
+
     try {
-      const equipment = await this.findUseCase.execute(Number(id));
+      let equipment: iEquipment | null;
+      const isNumber: boolean = !isNaN(Number(id));
+
+      if (isNumber) {
+        equipment = await this.findUseCase.execute(Number(id));
+      } else {
+        equipment = await this.findByNameUseCase.execute(id);
+      }
 
       if (!equipment) {
         return res
