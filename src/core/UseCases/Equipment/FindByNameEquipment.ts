@@ -7,7 +7,10 @@ export default class FindByIdEquipmentsUseCase {
     this.EquipmentRepository = repository;
   }
 
-  async execute(name: string): Promise<iEquipment | null> {
-    return await this.EquipmentRepository.findByName(name);
+  async execute(name: string): Promise<iEquipment[]> {
+    return await this.EquipmentRepository.findByName({
+      name: name,
+      description_name: name,
+    });
   }
 }
