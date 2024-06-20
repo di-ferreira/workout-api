@@ -1,6 +1,6 @@
 import { iEquipment } from './Equipment';
 import { iImageExercise } from './ImageExercise';
-import { iMuscleGroup } from './MuscleGroup';
+import { iMuscleGroup } from './iMuscleGroup';
 
 export interface iExercise {
   id: number | null;

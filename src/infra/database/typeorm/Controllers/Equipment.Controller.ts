@@ -111,6 +111,12 @@ export class EquipmentController {
         name,
         description_name,
       };
+      // TODO
+      /*
+        realizar uma busca por name e description_name e verificar 
+        se já existe um ou mais registros com mesmo name ou description_name
+        */
+
       const result = await this.createUseCase.execute(newEquipment);
       return res.status(STATUS_CODE.CREATED).json({ result });
     } catch (e) {
