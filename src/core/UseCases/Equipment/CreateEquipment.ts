@@ -1,4 +1,4 @@
-import { iEquipment } from 'src/core/Entities/Equipment';
+import { iEquipment } from '@/core/Entities/iEquipment';
 import { iEquipmentRepository } from 'src/core/Repositories/iEquipment.Repository';
 
 export default class CreateEquipmentsUseCase {

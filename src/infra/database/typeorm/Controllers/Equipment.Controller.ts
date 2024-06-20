@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { STATUS_CODE } from '../../../../@types';
 import { EquipmentRepository } from '../../../../adapters/Equipment.Repository';
-import { iEquipment } from '../../../../core/Entities/Equipment';
+import { iEquipment } from '../../../../core/Entities/iEquipment';
 import { iEquipmentRepository } from '../../../../core/Repositories/iEquipment.Repository';
 import CreateEquipmentsUseCase from '../../../../core/UseCases/Equipment/CreateEquipment';
 import DeleteEquipmentsUseCase from '../../../../core/UseCases/Equipment/DeleteEquipment';
@@ -107,15 +107,22 @@ export class EquipmentController {
     try {
       const { name, description_name } = req.body;
       const newEquipment: iEquipment = {
-        id: null,
+        id: 0,
         name,
         description_name,
       };
-      // TODO
-      /*
-        realizar uma busca por name e description_name e verificar 
-        se já existe um ou mais registros com mesmo name ou description_name
-        */
+
+      const existsEquipments: iEquipment[] = await this.repository.findByName({
+        name: newEquipment.name,
+        description_name: newEquipment.description_name,
+      });
+
+      if (existsEquipments.length > 0) {
+        return res.status(STATUS_CODE.BAD_REQUEST).json({
+          error: 'Exists Equipments with this name!',
+          result: existsEquipments,
+        });
+      }
 
       const result = await this.createUseCase.execute(newEquipment);
       return res.status(STATUS_CODE.CREATED).json({ result });

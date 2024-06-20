@@ -1,5 +1,5 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
-import { iEquipment } from '../../../../core/Entities/Equipment';
+import { iEquipment } from '../../../../core/Entities/iEquipment';
 
 @Entity('equipment')
 class Equipment implements iEquipment {

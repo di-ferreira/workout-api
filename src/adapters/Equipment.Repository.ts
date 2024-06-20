@@ -1,5 +1,5 @@
 import { Repository } from 'typeorm';
-import { iEquipment } from '../core/Entities/Equipment';
+import { iCreateEquipment, iEquipment } from '../core/Entities/iEquipment';
 import { iEquipmentRepository } from '../core/Repositories/iEquipment.Repository';
 import { AppDataSource } from '../infra/database/typeorm/AppDataSource';
 import Equipment from '../infra/database/typeorm/Entities/Equipment';
@@ -11,8 +11,11 @@ export class EquipmentRepository implements iEquipmentRepository {
     this.CustomRepository = AppDataSource.getRepository(Equipment);
   }
 
-  async findByName(name: string): Promise<iEquipment | null> {
-    return await this.CustomRepository.findOneBy({ name });
+  async findByName({
+    name,
+    description_name,
+  }: iCreateEquipment): Promise<iEquipment[]> {
+    return await this.CustomRepository.findBy([{ name }, { description_name }]);
   }
 
   async findAll({ page, limit }: SearchParams): Promise<iList<iEquipment>> {

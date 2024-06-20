@@ -1,11 +1,11 @@
-import { iEquipment } from '../Entities/Equipment';
+import { iCreateEquipment, iEquipment } from '../Entities/iEquipment';
 
 export interface iEquipmentRepository {
   findAll(params?: SearchParams): Promise<iList<iEquipment>>;
 
   findById(id: number): Promise<iEquipment | null>;
 
-  findByName(name: string): Promise<iEquipment | null>;
+  findByName(params: iCreateEquipment): Promise<iEquipment[]>;
 
   createEquipment(equipment: iEquipment): Promise<iEquipment>;
 

@@ -1,4 +1,4 @@
-import { iEquipment } from './Equipment';
+import { iEquipment } from './iEquipment';
 import { iImageExercise } from './ImageExercise';
 import { iMuscleGroup } from './iMuscleGroup';
 
