@@ -70,7 +70,7 @@ export class EquipmentController {
     const { id } = req.params;
 
     try {
-      let equipment: iEquipment | null;
+      let equipment: iEquipment | iEquipment[] | null;
       const isNumber: boolean = !isNaN(Number(id));
 
       if (isNumber) {
@@ -152,6 +152,18 @@ export class EquipmentController {
         name,
         description_name,
       };
+
+      const existsEquipments: iEquipment[] = await this.repository.findByName({
+        name: newEquipment.name,
+        description_name: newEquipment.description_name,
+      });
+
+      if (existsEquipments.length > 0) {
+        return res.status(STATUS_CODE.BAD_REQUEST).json({
+          error: 'Exists Equipments with this name!',
+          result: existsEquipments,
+        });
+      }
 
       const result = await this.updateUseCase.execute(newEquipment);
 
