@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { STATUS_CODE } from '../../../../@types';
+import { iController } from '../../../../@types/workout';
 import { EquipmentRepository } from '../../../../adapters/Equipment.Repository';
 import { iEquipment } from '../../../../core/Entities/iEquipment';
 import { iEquipmentRepository } from '../../../../core/Repositories/iEquipment.Repository';
@@ -11,7 +12,7 @@ import ListEquipmentsUseCase from '../../../../core/UseCases/Equipment/ListEquip
 import UpdateEquipmentsUseCase from '../../../../core/UseCases/Equipment/UpdateEquipment';
 import AppError from '../../../http/ErrorHandlers';
 
-export class EquipmentController {
+export class EquipmentController implements iController {
   private listUseCase: ListEquipmentsUseCase;
   private findUseCase: FindByIdEquipmentsUseCase;
   private findByNameUseCase: FindByNameEquipmentUseCase;

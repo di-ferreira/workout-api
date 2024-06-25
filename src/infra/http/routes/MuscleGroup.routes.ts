@@ -6,5 +6,6 @@ const MuscleGroupsRoutes = Router();
 const controller = new MuscleGroupController();
 
 MuscleGroupsRoutes.post('', controller.create);
+MuscleGroupsRoutes.get('', controller.list);
 
 export default MuscleGroupsRoutes;

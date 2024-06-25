@@ -1,5 +1,6 @@
 import { iEquipment } from '@/core/Entities/iEquipment';
 import { iEquipmentRepository } from 'src/core/Repositories/iEquipment.Repository';
+import { iList, SearchParams } from '../../../@types/workout';
 
 export default class ListEquipmentsUseCase {
   private EquipmentRepository: iEquipmentRepository;

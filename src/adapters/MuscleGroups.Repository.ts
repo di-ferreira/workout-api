@@ -1,4 +1,5 @@
 import { Repository } from 'typeorm';
+import { SearchParams, iList } from '../@types/workout';
 import {
   iCreateMuscleGroup,
   iMuscleGroup,
