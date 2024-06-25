@@ -8,6 +8,7 @@ import UseCaseCreateMuscleGroup from '../../../../core/UseCases/MuscleGroup/Crea
 import UseCaseFindByIdMuscleGroup from '../../../../core/UseCases/MuscleGroup/FindByIDMuscleGroup';
 import UseCaseFindNameMuscleGroup from '../../../../core/UseCases/MuscleGroup/FindByNameMuscleGroup';
 import UseCaseListMuscleGroup from '../../../../core/UseCases/MuscleGroup/ListMuscleGroup';
+import UseCaseUpdateMuscleGroup from '../../../../core/UseCases/MuscleGroup/UpdateMuscleGroup';
 import AppError from '../../../http/ErrorHandlers';
 
 export class MuscleGroupController implements iController {
@@ -16,6 +17,7 @@ export class MuscleGroupController implements iController {
   private listUseCase: UseCaseListMuscleGroup;
   private findByIdUseCase: UseCaseFindByIdMuscleGroup;
   private findByNameUseCase: UseCaseFindNameMuscleGroup;
+  private updateUseCase: UseCaseUpdateMuscleGroup;
 
   constructor() {
     this.repository = new MuscleGroupRepository();
@@ -23,9 +25,11 @@ export class MuscleGroupController implements iController {
     this.listUseCase = new UseCaseListMuscleGroup(this.repository);
     this.findByIdUseCase = new UseCaseFindByIdMuscleGroup(this.repository);
     this.findByNameUseCase = new UseCaseFindNameMuscleGroup(this.repository);
+    this.updateUseCase = new UseCaseUpdateMuscleGroup(this.repository);
     this.create = this.create.bind(this);
     this.list = this.list.bind(this);
     this.show = this.show.bind(this);
+    this.save = this.save.bind(this);
   }
 
   async create(req: Request, res: Response): Promise<Response> {
@@ -116,7 +120,7 @@ export class MuscleGroupController implements iController {
       if (!muscleGroup) {
         return res
           .status(STATUS_CODE.NOT_FOUND)
-          .json({ result: 'Grupo Muscular não encontrado' });
+          .json({ result: 'Muscle Group not found!' });
       }
 
       return res.status(STATUS_CODE.SUCCESS).json(muscleGroup);
@@ -137,10 +141,45 @@ export class MuscleGroupController implements iController {
     }
   }
 
-  save(req: Request, res: Response): Promise<Response> {
-    throw new Error('Method not implemented.');
+  async save(req: Request, res: Response): Promise<Response> {
+    const { id } = req.params;
+    try {
+      const { name, description_name } = req.body;
+      const newMuscleGroup: iMuscleGroup = {
+        id: Number(id),
+        name,
+        description_name,
+      };
+
+      const muscleGroup = await this.findByIdUseCase.execute(Number(id));
+
+      if (!muscleGroup) {
+        return res
+          .status(STATUS_CODE.NOT_FOUND)
+          .json({ result: 'Muscle Group not found' });
+      }
+
+      const result = await this.updateUseCase.execute(newMuscleGroup);
+
+      return res.status(STATUS_CODE.SUCCESS).json({ result });
+    } catch (e) {
+      console.error('Error controller: ' + e);
+
+      if (e instanceof AppError) {
+        return res.status(e.statusCode).send({ error: e.message });
+      } else if (e instanceof Error) {
+        return res
+          .status(STATUS_CODE.INTERNAL_SERVER_ERROR)
+          .send({ error: e.message });
+      } else {
+        return res
+          .status(STATUS_CODE.INTERNAL_SERVER_ERROR)
+          .send({ error: String(e) });
+      }
+    }
   }
-  remove(req: Request, res: Response): Promise<Response> {
+
+  async remove(req: Request, res: Response): Promise<Response> {
     throw new Error('Method not implemented.');
   }
 }

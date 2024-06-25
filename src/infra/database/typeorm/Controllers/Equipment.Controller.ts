@@ -154,16 +154,12 @@ export class EquipmentController implements iController {
         description_name,
       };
 
-      const existsEquipments: iEquipment[] = await this.repository.findByName({
-        name: newEquipment.name,
-        description_name: newEquipment.description_name,
-      });
+      const equipment = await this.findUseCase.execute(Number(id));
 
-      if (existsEquipments.length > 0) {
-        return res.status(STATUS_CODE.BAD_REQUEST).json({
-          error: 'Exists Equipments with this name!',
-          result: existsEquipments,
-        });
+      if (!equipment) {
+        return res
+          .status(STATUS_CODE.NOT_FOUND)
+          .json({ result: 'Equipment not found' });
       }
 
       const result = await this.updateUseCase.execute(newEquipment);
