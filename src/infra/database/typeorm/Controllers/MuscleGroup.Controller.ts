@@ -5,6 +5,8 @@ import { MuscleGroupRepository } from '../../../../adapters/MuscleGroups.Reposit
 import { iMuscleGroup } from '../../../../core/Entities/iMuscleGroup';
 import { iMuscleGroupRepository } from '../../../../core/Repositories/iMuscleGroup.Repository';
 import UseCaseCreateMuscleGroup from '../../../../core/UseCases/MuscleGroup/CreateMuscleGroup';
+import UseCaseFindByIdMuscleGroup from '../../../../core/UseCases/MuscleGroup/FindByIDMuscleGroup';
+import UseCaseFindNameMuscleGroup from '../../../../core/UseCases/MuscleGroup/FindByNameMuscleGroup';
 import UseCaseListMuscleGroup from '../../../../core/UseCases/MuscleGroup/ListMuscleGroup';
 import AppError from '../../../http/ErrorHandlers';
 
@@ -12,13 +14,18 @@ export class MuscleGroupController implements iController {
   private repository: iMuscleGroupRepository;
   private createUseCase: UseCaseCreateMuscleGroup;
   private listUseCase: UseCaseListMuscleGroup;
+  private findByIdUseCase: UseCaseFindByIdMuscleGroup;
+  private findByNameUseCase: UseCaseFindNameMuscleGroup;
 
   constructor() {
     this.repository = new MuscleGroupRepository();
     this.createUseCase = new UseCaseCreateMuscleGroup(this.repository);
     this.listUseCase = new UseCaseListMuscleGroup(this.repository);
+    this.findByIdUseCase = new UseCaseFindByIdMuscleGroup(this.repository);
+    this.findByNameUseCase = new UseCaseFindNameMuscleGroup(this.repository);
     this.create = this.create.bind(this);
     this.list = this.list.bind(this);
+    this.show = this.show.bind(this);
   }
 
   async create(req: Request, res: Response): Promise<Response> {
@@ -93,8 +100,41 @@ export class MuscleGroupController implements iController {
     }
   }
 
-  show(req: Request, res: Response): Promise<Response> {
-    throw new Error('Method not implemented.');
+  async show(req: Request, res: Response): Promise<Response> {
+    const { id } = req.params;
+
+    try {
+      let muscleGroup: iMuscleGroup | iMuscleGroup[] | null;
+      const isNumber: boolean = !isNaN(Number(id));
+
+      if (isNumber) {
+        muscleGroup = await this.findByIdUseCase.execute(Number(id));
+      } else {
+        muscleGroup = await this.findByNameUseCase.execute(id);
+      }
+
+      if (!muscleGroup) {
+        return res
+          .status(STATUS_CODE.NOT_FOUND)
+          .json({ result: 'Grupo Muscular não encontrado' });
+      }
+
+      return res.status(STATUS_CODE.SUCCESS).json(muscleGroup);
+    } catch (e) {
+      console.error('Error controller: ' + e);
+
+      if (e instanceof AppError) {
+        return res.status(e.statusCode).send({ error: e.message });
+      } else if (e instanceof Error) {
+        return res
+          .status(STATUS_CODE.INTERNAL_SERVER_ERROR)
+          .send({ error: e.message });
+      } else {
+        return res
+          .status(STATUS_CODE.INTERNAL_SERVER_ERROR)
+          .send({ error: String(e) });
+      }
+    }
   }
 
   save(req: Request, res: Response): Promise<Response> {

@@ -1,3 +1,4 @@
+import { iList, SearchParams } from '../../@types/workout';
 import { iCreateMuscleGroup, iMuscleGroup } from '../Entities/iMuscleGroup';
 
 export interface iMuscleGroupRepository {

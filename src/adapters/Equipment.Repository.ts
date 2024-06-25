@@ -1,4 +1,5 @@
 import { Repository } from 'typeorm';
+import { iList, SearchParams } from '../@types/workout';
 import { iCreateEquipment, iEquipment } from '../core/Entities/iEquipment';
 import { iEquipmentRepository } from '../core/Repositories/iEquipment.Repository';
 import { AppDataSource } from '../infra/database/typeorm/AppDataSource';
