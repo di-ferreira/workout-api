@@ -5,6 +5,7 @@ import { MuscleGroupRepository } from '../../../../adapters/MuscleGroups.Reposit
 import { iMuscleGroup } from '../../../../core/Entities/iMuscleGroup';
 import { iMuscleGroupRepository } from '../../../../core/Repositories/iMuscleGroup.Repository';
 import UseCaseCreateMuscleGroup from '../../../../core/UseCases/MuscleGroup/CreateMuscleGroup';
+import UseCaseDeleteMuscleGroup from '../../../../core/UseCases/MuscleGroup/DeleteMuscleGroup';
 import UseCaseFindByIdMuscleGroup from '../../../../core/UseCases/MuscleGroup/FindByIDMuscleGroup';
 import UseCaseFindNameMuscleGroup from '../../../../core/UseCases/MuscleGroup/FindByNameMuscleGroup';
 import UseCaseListMuscleGroup from '../../../../core/UseCases/MuscleGroup/ListMuscleGroup';
@@ -18,6 +19,7 @@ export class MuscleGroupController implements iController {
   private findByIdUseCase: UseCaseFindByIdMuscleGroup;
   private findByNameUseCase: UseCaseFindNameMuscleGroup;
   private updateUseCase: UseCaseUpdateMuscleGroup;
+  private removeUseCase: UseCaseDeleteMuscleGroup;
 
   constructor() {
     this.repository = new MuscleGroupRepository();
@@ -26,10 +28,12 @@ export class MuscleGroupController implements iController {
     this.findByIdUseCase = new UseCaseFindByIdMuscleGroup(this.repository);
     this.findByNameUseCase = new UseCaseFindNameMuscleGroup(this.repository);
     this.updateUseCase = new UseCaseUpdateMuscleGroup(this.repository);
+    this.removeUseCase = new UseCaseDeleteMuscleGroup(this.repository);
     this.create = this.create.bind(this);
     this.list = this.list.bind(this);
     this.show = this.show.bind(this);
     this.save = this.save.bind(this);
+    this.remove = this.remove.bind(this);
   }
 
   async create(req: Request, res: Response): Promise<Response> {
@@ -180,6 +184,34 @@ export class MuscleGroupController implements iController {
   }
 
   async remove(req: Request, res: Response): Promise<Response> {
-    throw new Error('Method not implemented.');
+    const { id } = req.params;
+    try {
+      const muscleGroup = await this.findByIdUseCase.execute(Number(id));
+
+      if (!muscleGroup) {
+        return res
+          .status(STATUS_CODE.NOT_FOUND)
+          .json({ result: 'Muscle Group not found' });
+      }
+      await this.removeUseCase.execute(muscleGroup);
+
+      return res
+        .status(STATUS_CODE.SUCCESS)
+        .json({ result: 'Success removed Muscle Group!' });
+    } catch (e) {
+      console.error('Error controller: ' + e);
+
+      if (e instanceof AppError) {
+        return res.status(e.statusCode).send({ error: e.message });
+      } else if (e instanceof Error) {
+        return res
+          .status(STATUS_CODE.INTERNAL_SERVER_ERROR)
+          .send({ error: e.message });
+      } else {
+        return res
+          .status(STATUS_CODE.INTERNAL_SERVER_ERROR)
+          .send({ error: String(e) });
+      }
+    }
   }
 }
