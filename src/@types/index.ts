@@ -11,6 +11,12 @@ export const STATUS_CODE = {
   NOT_IMPLEMENTED: 501,
 };
 
+export const ERROR_MESSAGE = {
+  INVALID_TYPE_ERROR: 'must be a',
+  REQUIRED_ERROR: 'is required',
+  MINIMUM_LENGTH_ERROR: 'or more characters at least',
+};
+
 const muscleGroups = {
   abductors: 'abdutores',
   adductors: 'adutores',

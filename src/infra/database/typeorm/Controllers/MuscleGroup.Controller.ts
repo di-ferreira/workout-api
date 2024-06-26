@@ -11,6 +11,10 @@ import UseCaseFindNameMuscleGroup from '../../../../core/UseCases/MuscleGroup/Fi
 import UseCaseListMuscleGroup from '../../../../core/UseCases/MuscleGroup/ListMuscleGroup';
 import UseCaseUpdateMuscleGroup from '../../../../core/UseCases/MuscleGroup/UpdateMuscleGroup';
 import AppError from '../../../http/ErrorHandlers';
+import {
+  createMuscleGroupValidation,
+  updateMuscleGroupValidation,
+} from '../../../validations/MuscleGroup.validation';
 
 export class MuscleGroupController implements iController {
   private repository: iMuscleGroupRepository;
@@ -44,6 +48,14 @@ export class MuscleGroupController implements iController {
         name,
         description_name,
       };
+      const validationObj =
+        createMuscleGroupValidation.safeParse(newMuscleGroup);
+
+      if (!validationObj.success) {
+        return res.status(STATUS_CODE.BAD_REQUEST).send({
+          error: validationObj.error.issues[0].message,
+        });
+      }
 
       const existsMuscleGroup: iMuscleGroup[] =
         await this.repository.findByName({
@@ -155,6 +167,14 @@ export class MuscleGroupController implements iController {
         description_name,
       };
 
+      const validationObj =
+        updateMuscleGroupValidation.safeParse(newMuscleGroup);
+
+      if (!validationObj.success) {
+        return res.status(STATUS_CODE.BAD_REQUEST).send({
+          error: validationObj.error.issues[0].message,
+        });
+      }
       const muscleGroup = await this.findByIdUseCase.execute(Number(id));
 
       if (!muscleGroup) {
