@@ -11,6 +11,10 @@ import FindByNameEquipmentUseCase from '../../../../core/UseCases/Equipment/Find
 import ListEquipmentsUseCase from '../../../../core/UseCases/Equipment/ListEquipments';
 import UpdateEquipmentsUseCase from '../../../../core/UseCases/Equipment/UpdateEquipment';
 import AppError from '../../../http/ErrorHandlers';
+import {
+  createEquipmentValidation,
+  updateEquipmentValidation,
+} from '../../../validations/Equipment.validation';
 
 export class EquipmentController implements iController {
   private listUseCase: ListEquipmentsUseCase;
@@ -113,6 +117,14 @@ export class EquipmentController implements iController {
         description_name,
       };
 
+      const validationObj = createEquipmentValidation.safeParse(newEquipment);
+
+      if (!validationObj.success) {
+        return res.status(STATUS_CODE.BAD_REQUEST).send({
+          error: validationObj.error.issues[0].message,
+        });
+      }
+
       const existsEquipments: iEquipment[] = await this.repository.findByName({
         name: newEquipment.name,
         description_name: newEquipment.description_name,
@@ -153,6 +165,14 @@ export class EquipmentController implements iController {
         name,
         description_name,
       };
+
+      const validationObj = updateEquipmentValidation.safeParse(newEquipment);
+
+      if (!validationObj.success) {
+        return res.status(STATUS_CODE.BAD_REQUEST).send({
+          error: validationObj.error.issues[0].message,
+        });
+      }
 
       const equipment = await this.findUseCase.execute(Number(id));
 
