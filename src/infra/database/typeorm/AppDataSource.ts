@@ -6,12 +6,16 @@ import {
   EntitySchema,
   MixedList,
 } from 'typeorm';
-import Equipment from './Entities/Equipment';
-import MuscleGroup from './Entities/MuscleGroup';
+import EquipmentEntity from './Entities/Equipment';
+import ExerciseEntity from './Entities/Exercise';
+import ImageExerciseEntity from './Entities/ImageExercise';
+import MuscleGroupEntity from './Entities/MuscleGroup';
 
 const EntityClasses: MixedList<Function | string | EntitySchema> = [
-  Equipment,
-  MuscleGroup,
+  EquipmentEntity,
+  MuscleGroupEntity,
+  ImageExerciseEntity,
+  ExerciseEntity,
 ];
 
 let DSConfig: DataSourceOptions;

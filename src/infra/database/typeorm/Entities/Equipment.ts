@@ -2,7 +2,7 @@ import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 import { iEquipment } from '../../../../core/Entities/iEquipment';
 
 @Entity('equipment')
-class Equipment implements iEquipment {
+class EquipmentEntity implements iEquipment {
   @PrimaryGeneratedColumn('increment')
   id!: number;
 
@@ -13,4 +13,4 @@ class Equipment implements iEquipment {
   description_name!: string;
 }
 
-export default Equipment;
+export default EquipmentEntity;
