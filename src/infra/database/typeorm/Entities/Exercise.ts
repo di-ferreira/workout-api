@@ -22,30 +22,31 @@ class ExerciseEntity implements iExercise {
   @Column({ type: 'varchar', length: 150 })
   name!: string;
 
-  @Column({ type: 'varchar' })
+  @Column({ type: 'text' })
   description!: string;
 
-  @Column({ type: 'varchar' })
+  @Column({ type: 'text' })
   instructions!: string;
 
-  @Column({ type: 'varchar' })
+  @Column({ type: 'text' })
   tips!: string;
 
   @OneToMany(
     () => ImageExerciseEntity,
-    (imageExercise) => imageExercise.exercise
+    (imageExercise) => imageExercise.exercise,
+    { cascade: true }
   )
   images!: iImageExercise[];
 
-  @ManyToMany(() => ExerciseEntity)
+  @ManyToMany(() => ExerciseEntity, { cascade: ['insert'] })
   @JoinTable()
   substitutes!: iExercise[];
 
-  @ManyToMany(() => MuscleGroupEntity)
+  @ManyToMany(() => MuscleGroupEntity, { cascade: ['insert'] })
   @JoinTable()
   muscle_group!: iMuscleGroup[];
 
-  @ManyToMany(() => EquipmentEntity)
+  @ManyToMany(() => EquipmentEntity, { cascade: ['insert'] })
   @JoinTable()
   equipment!: iEquipment[];
 }

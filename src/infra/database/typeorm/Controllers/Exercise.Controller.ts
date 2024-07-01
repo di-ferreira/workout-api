@@ -1,145 +1,101 @@
 import { Request, Response } from 'express';
 import { STATUS_CODE } from '../../../../@types';
 import { iController } from '../../../../@types/workout';
-import { EquipmentRepository } from '../../../../adapters/Equipment.Repository';
-import { iEquipment } from '../../../../core/Entities/iEquipment';
-import { iEquipmentRepository } from '../../../../core/Repositories/iEquipment.Repository';
-import CreateEquipmentsUseCase from '../../../../core/UseCases/Equipment/CreateEquipment';
-import DeleteEquipmentsUseCase from '../../../../core/UseCases/Equipment/DeleteEquipment';
-import FindByIdEquipmentsUseCase from '../../../../core/UseCases/Equipment/FindByIDEquipment';
-import FindByNameEquipmentUseCase from '../../../../core/UseCases/Equipment/FindByNameEquipment';
-import ListEquipmentsUseCase from '../../../../core/UseCases/Equipment/ListEquipments';
-import UpdateEquipmentsUseCase from '../../../../core/UseCases/Equipment/UpdateEquipment';
+import { ExerciceRepository } from '../../../../adapters/Exercise.Repository';
+import { ImageExerciceRepository } from '../../../../adapters/ImageExercise.Repository';
+import { iExercise } from '../../../../core/Entities/iExercise';
+import { iCreateImageExercise } from '../../../../core/Entities/iImageExercise';
+import { iExerciceRepository } from '../../../../core/Repositories/iExercise.Repository';
+import { iImageExerciceRepository } from '../../../../core/Repositories/iImageExercise.Repository';
+import CreateExerciseUseCase from '../../../../core/UseCases/Exercise/CreateExercise';
 import AppError from '../../../http/ErrorHandlers';
-import {
-  createEquipmentValidation,
-  updateEquipmentValidation,
-} from '../../../validations/Equipment.validation';
+import { removeLocalFiles } from '../../../utils/UploadImage';
+import { removeCircularReferencesExercise } from '../../../utils/removeCircularReference';
 
 export class ExerciseController implements iController {
-  private listUseCase: ListEquipmentsUseCase;
-  private findUseCase: FindByIdEquipmentsUseCase;
-  private findByNameUseCase: FindByNameEquipmentUseCase;
-  private createUseCase: CreateEquipmentsUseCase;
-  private updateUseCase: UpdateEquipmentsUseCase;
-  private removeUseCase: DeleteEquipmentsUseCase;
-  private repository: iEquipmentRepository;
+  private repository: iExerciceRepository;
+  private imageRepository: iImageExerciceRepository;
+  private createUseCase: CreateExerciseUseCase;
+  // private listUseCase: ListEquipmentsUseCase;
+  // private findUseCase: FindByIdEquipmentsUseCase;
+  // private findByNameUseCase: FindByNameEquipmentUseCase;
+  // private updateUseCase: UpdateEquipmentsUseCase;
+  // private removeUseCase: DeleteEquipmentsUseCase;
 
   constructor() {
-    this.repository = new EquipmentRepository();
-    this.listUseCase = new ListEquipmentsUseCase(this.repository);
-    this.findUseCase = new FindByIdEquipmentsUseCase(this.repository);
-    this.findByNameUseCase = new FindByNameEquipmentUseCase(this.repository);
-    this.createUseCase = new CreateEquipmentsUseCase(this.repository);
-    this.updateUseCase = new UpdateEquipmentsUseCase(this.repository);
-    this.removeUseCase = new DeleteEquipmentsUseCase(this.repository);
-    this.list = this.list.bind(this);
-    this.show = this.show.bind(this);
+    this.repository = new ExerciceRepository();
+    this.imageRepository = new ImageExerciceRepository();
+    this.createUseCase = new CreateExerciseUseCase(this.repository);
     this.create = this.create.bind(this);
-    this.save = this.save.bind(this);
-    this.remove = this.remove.bind(this);
-  }
-
-  async list(req: Request, res: Response): Promise<Response> {
-    const { page, limit } = req.query;
-
-    try {
-      const listEquipment = await this.listUseCase.execute({
-        page: Number(page),
-        limit: Number(limit),
-      });
-
-      if (listEquipment.total_registers === 0) {
-        return res.status(STATUS_CODE.NO_CONTENT).json(listEquipment);
-      }
-
-      return res.status(STATUS_CODE.SUCCESS).json(listEquipment);
-    } catch (e) {
-      console.error('Error controller: ' + e);
-
-      if (e instanceof AppError) {
-        return res.status(e.statusCode).send({ error: e.message });
-      } else if (e instanceof Error) {
-        return res
-          .status(STATUS_CODE.INTERNAL_SERVER_ERROR)
-          .send({ error: e.message });
-      } else {
-        return res
-          .status(STATUS_CODE.INTERNAL_SERVER_ERROR)
-          .send({ error: String(e) });
-      }
-    }
-  }
-
-  async show(req: Request, res: Response): Promise<Response> {
-    const { id } = req.params;
-
-    try {
-      let equipment: iEquipment | iEquipment[] | null;
-      const isNumber: boolean = !isNaN(Number(id));
-
-      if (isNumber) {
-        equipment = await this.findUseCase.execute(Number(id));
-      } else {
-        equipment = await this.findByNameUseCase.execute(id);
-      }
-
-      if (!equipment) {
-        return res
-          .status(STATUS_CODE.NOT_FOUND)
-          .json({ result: 'Equipamento não encontrado' });
-      }
-
-      return res.status(STATUS_CODE.SUCCESS).json(equipment);
-    } catch (e) {
-      console.error('Error controller: ' + e);
-
-      if (e instanceof AppError) {
-        return res.status(e.statusCode).send({ error: e.message });
-      } else if (e instanceof Error) {
-        return res
-          .status(STATUS_CODE.INTERNAL_SERVER_ERROR)
-          .send({ error: e.message });
-      } else {
-        return res
-          .status(STATUS_CODE.INTERNAL_SERVER_ERROR)
-          .send({ error: String(e) });
-      }
-    }
+    // this.listUseCase = new ListEquipmentsUseCase(this.repository);
+    // this.findUseCase = new FindByIdEquipmentsUseCase(this.repository);
+    // this.findByNameUseCase = new FindByNameEquipmentUseCase(this.repository);
+    // this.updateUseCase = new UpdateEquipmentsUseCase(this.repository);
+    // this.removeUseCase = new DeleteEquipmentsUseCase(this.repository);
+    // this.list = this.list.bind(this);
+    // this.show = this.show.bind(this);
+    // this.save = this.save.bind(this);
+    // this.remove = this.remove.bind(this);
   }
 
   async create(req: Request, res: Response): Promise<Response> {
+    const {
+      name,
+      description,
+      instructions,
+      tips,
+      muscle_group,
+      equipment,
+      substitutes,
+    } = req.body;
+
+    const files = req.files as Express.Multer.File[];
+
     try {
-      const { name, description_name } = req.body;
-      const newEquipment: iEquipment = {
-        id: 0,
+      const newExercise: iExercise = {
         name,
-        description_name,
+        description,
+        instructions,
+        tips,
+        muscle_group: JSON.parse(muscle_group),
+        equipment: JSON.parse(equipment),
+        substitutes: JSON.parse(substitutes),
+        images: [],
+        id: 0,
       };
 
-      const validationObj = createEquipmentValidation.safeParse(newEquipment);
+      // TODO validations Exercises
+      // const validationObj = createEquipmentValidation.safeParse(newEquipment);
 
-      if (!validationObj.success) {
-        return res.status(STATUS_CODE.BAD_REQUEST).send({
-          error: validationObj.error.issues[0].message,
+      // if (!validationObj.success) {
+      //   return res.status(STATUS_CODE.BAD_REQUEST).send({
+      //     error: validationObj.error.issues[0].message,
+      //   });
+      // }
+
+      const imagesUploaded: iCreateImageExercise[] = [];
+      files.map((image) => {
+        imagesUploaded.push({
+          name: image.filename,
+          link: `${req.protocol}: //${req.get('host')}/uploads/images/${
+            image.filename
+          }`,
         });
-      }
-
-      const existsEquipments: iEquipment[] = await this.repository.findByName({
-        name: newEquipment.name,
-        description_name: newEquipment.description_name,
       });
 
-      if (existsEquipments.length > 0) {
-        return res.status(STATUS_CODE.BAD_REQUEST).json({
-          error: 'Exists Equipments with this name!',
-          result: existsEquipments,
-        });
-      }
-
-      const result = await this.createUseCase.execute(newEquipment);
-      return res.status(STATUS_CODE.CREATED).json({ result });
+      newExercise.images = imagesUploaded;
+      const createdExercise = await this.createUseCase.execute(newExercise);
+      const result = JSON.stringify(
+        createdExercise,
+        removeCircularReferencesExercise
+      );
+      return res
+        .status(STATUS_CODE.CREATED)
+        .json({ result: JSON.parse(result) });
     } catch (e) {
+      if (files) {
+        removeLocalFiles(files);
+      }
       console.error('Error controller: ' + e);
 
       if (e instanceof AppError) {
@@ -154,83 +110,21 @@ export class ExerciseController implements iController {
           .send({ error: String(e) });
       }
     }
+  }
+
+  async list(req: Request, res: Response): Promise<Response> {
+    throw new Error('not implemented');
+  }
+
+  async show(req: Request, res: Response): Promise<Response> {
+    throw new Error('not implemented');
   }
 
   async save(req: Request, res: Response): Promise<Response> {
-    const { id } = req.params;
-    try {
-      const { name, description_name } = req.body;
-      const newEquipment: iEquipment = {
-        id: Number(id),
-        name,
-        description_name,
-      };
-
-      const validationObj = updateEquipmentValidation.safeParse(newEquipment);
-
-      if (!validationObj.success) {
-        return res.status(STATUS_CODE.BAD_REQUEST).send({
-          error: validationObj.error.issues[0].message,
-        });
-      }
-
-      const equipment = await this.findUseCase.execute(Number(id));
-
-      if (!equipment) {
-        return res
-          .status(STATUS_CODE.NOT_FOUND)
-          .json({ result: 'Equipment not found' });
-      }
-
-      const result = await this.updateUseCase.execute(newEquipment);
-
-      return res.status(STATUS_CODE.SUCCESS).json({ result });
-    } catch (e) {
-      console.error('Error controller: ' + e);
-
-      if (e instanceof AppError) {
-        return res.status(e.statusCode).send({ error: e.message });
-      } else if (e instanceof Error) {
-        return res
-          .status(STATUS_CODE.INTERNAL_SERVER_ERROR)
-          .send({ error: e.message });
-      } else {
-        return res
-          .status(STATUS_CODE.INTERNAL_SERVER_ERROR)
-          .send({ error: String(e) });
-      }
-    }
+    throw new Error('not implemented');
   }
 
   async remove(req: Request, res: Response): Promise<Response> {
-    const { id } = req.params;
-    try {
-      const equipment = await this.findUseCase.execute(Number(id));
-
-      if (!equipment) {
-        return res
-          .status(STATUS_CODE.NOT_FOUND)
-          .json({ result: 'Equipamento não encontrado' });
-      }
-      await this.removeUseCase.execute(equipment);
-
-      return res
-        .status(STATUS_CODE.SUCCESS)
-        .json({ result: 'Success removed Equipment!' });
-    } catch (e) {
-      console.error('Error controller: ' + e);
-
-      if (e instanceof AppError) {
-        return res.status(e.statusCode).send({ error: e.message });
-      } else if (e instanceof Error) {
-        return res
-          .status(STATUS_CODE.INTERNAL_SERVER_ERROR)
-          .send({ error: e.message });
-      } else {
-        return res
-          .status(STATUS_CODE.INTERNAL_SERVER_ERROR)
-          .send({ error: String(e) });
-      }
-    }
+    throw new Error('not implemented');
   }
 }

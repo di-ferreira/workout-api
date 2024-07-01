@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { ExerciseController } from '../../database/typeorm/Controllers/Exercise.Controller';
+import { upload } from '../../utils/UploadImage';
 
 const ExerciseRoutes = Router();
 
@@ -9,6 +10,6 @@ ExerciseRoutes.get('/:id', controller.show);
 ExerciseRoutes.put('/:id', controller.save);
 ExerciseRoutes.delete('/:id', controller.remove);
 ExerciseRoutes.get('', controller.list);
-ExerciseRoutes.post('', controller.create);
+ExerciseRoutes.post('', upload.array('images', 10), controller.create);
 
 export default ExerciseRoutes;

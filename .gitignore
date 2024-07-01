@@ -9,3 +9,4 @@ temp/
 /src/**/*.sqlite-shm
 /src/**/*.sqlite-wal
 /src/**/*.sqlite
+/public/images/exercise/*.gif

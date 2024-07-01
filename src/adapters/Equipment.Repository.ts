@@ -3,13 +3,13 @@ import { iList, SearchParams } from '../@types/workout';
 import { iCreateEquipment, iEquipment } from '../core/Entities/iEquipment';
 import { iEquipmentRepository } from '../core/Repositories/iEquipment.Repository';
 import { AppDataSource } from '../infra/database/typeorm/AppDataSource';
-import Equipment from '../infra/database/typeorm/Entities/Equipment';
+import EquipmentEntity from '../infra/database/typeorm/Entities/Equipment';
 
 export class EquipmentRepository implements iEquipmentRepository {
-  private CustomRepository: Repository<Equipment>;
+  private CustomRepository: Repository<EquipmentEntity>;
 
   constructor() {
-    this.CustomRepository = AppDataSource.getRepository(Equipment);
+    this.CustomRepository = AppDataSource.getRepository(EquipmentEntity);
   }
 
   async findByName({

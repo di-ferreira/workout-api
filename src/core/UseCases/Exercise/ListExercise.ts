@@ -1,5 +1,6 @@
 import { iExercise } from '@/core/Entities/iExercise';
 import { iExerciceRepository } from 'src/core/Repositories/iExercise.Repository';
+import { iList, SearchParams } from '../../../@types/workout';
 
 export default class ListExerciseUseCase {
   private exerciceRepository: iExerciceRepository;
