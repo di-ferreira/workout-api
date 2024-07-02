@@ -12,7 +12,12 @@ app.use('/v1', routes);
 const port = process.env.PORT;
 
 app.use(
-  (error: Error, request: Request, response: Response, next: NextFunction) => {
+  (
+    error: Error,
+    _request: Request,
+    response: Response,
+    _next: NextFunction
+  ) => {
     if (error instanceof AppError) {
       return response
         .status(error.statusCode)
