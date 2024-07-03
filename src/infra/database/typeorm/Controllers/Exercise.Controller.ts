@@ -8,6 +8,7 @@ import { iCreateImageExercise } from '../../../../core/Entities/iImageExercise';
 import { iExerciceRepository } from '../../../../core/Repositories/iExercise.Repository';
 import { iImageExerciceRepository } from '../../../../core/Repositories/iImageExercise.Repository';
 import CreateExerciseUseCase from '../../../../core/UseCases/Exercise/CreateExercise';
+import ListExerciseUseCase from '../../../../core/UseCases/Exercise/ListExercise';
 import AppError from '../../../http/ErrorHandlers';
 import { removeLocalFiles } from '../../../utils/UploadImage';
 import { removeCircularReferencesExercise } from '../../../utils/removeCircularReference';
@@ -16,7 +17,7 @@ export class ExerciseController implements iController {
   private repository: iExerciceRepository;
   private imageRepository: iImageExerciceRepository;
   private createUseCase: CreateExerciseUseCase;
-  // private listUseCase: ListEquipmentsUseCase;
+  private listUseCase: ListExerciseUseCase;
   // private findUseCase: FindByIdEquipmentsUseCase;
   // private findByNameUseCase: FindByNameEquipmentUseCase;
   // private updateUseCase: UpdateEquipmentsUseCase;
@@ -27,12 +28,12 @@ export class ExerciseController implements iController {
     this.imageRepository = new ImageExerciceRepository();
     this.createUseCase = new CreateExerciseUseCase(this.repository);
     this.create = this.create.bind(this);
-    // this.listUseCase = new ListEquipmentsUseCase(this.repository);
+    this.listUseCase = new ListExerciseUseCase(this.repository);
     // this.findUseCase = new FindByIdEquipmentsUseCase(this.repository);
     // this.findByNameUseCase = new FindByNameEquipmentUseCase(this.repository);
     // this.updateUseCase = new UpdateEquipmentsUseCase(this.repository);
     // this.removeUseCase = new DeleteEquipmentsUseCase(this.repository);
-    // this.list = this.list.bind(this);
+    this.list = this.list.bind(this);
     // this.show = this.show.bind(this);
     // this.save = this.save.bind(this);
     // this.remove = this.remove.bind(this);
@@ -113,7 +114,34 @@ export class ExerciseController implements iController {
   }
 
   async list(req: Request, res: Response): Promise<Response> {
-    throw new Error('not implemented');
+    const { page, limit } = req.query;
+
+    try {
+      const listExercise = await this.listUseCase.execute({
+        page: Number(page),
+        limit: Number(limit),
+      });
+
+      if (listExercise.total_registers === 0) {
+        return res.status(STATUS_CODE.NO_CONTENT).json(listExercise);
+      }
+
+      return res.status(STATUS_CODE.SUCCESS).json(listExercise);
+    } catch (e) {
+      console.error('Error controller: ' + e);
+
+      if (e instanceof AppError) {
+        return res.status(e.statusCode).send({ error: e.message });
+      } else if (e instanceof Error) {
+        return res
+          .status(STATUS_CODE.INTERNAL_SERVER_ERROR)
+          .send({ error: e.message });
+      } else {
+        return res
+          .status(STATUS_CODE.INTERNAL_SERVER_ERROR)
+          .send({ error: String(e) });
+      }
+    }
   }
 
   async show(req: Request, res: Response): Promise<Response> {

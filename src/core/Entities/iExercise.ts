@@ -4,9 +4,9 @@ import { iCreateMuscleGroup, iMuscleGroup } from './iMuscleGroup';
 
 export interface iCreateExercise {
   name: string;
-  description: string;
-  instructions: string;
-  tips: string;
+  description?: string;
+  instructions?: string;
+  tips?: string;
   muscle_group: iMuscleGroup[] | iCreateMuscleGroup[];
   equipment: iEquipment[] | iCreateEquipment[];
   images: iImageExercise[] | iCreateImageExercise[];

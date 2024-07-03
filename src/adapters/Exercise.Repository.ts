@@ -53,9 +53,15 @@ export class ExerciceRepository implements iExerciceRepository {
       const exerciseSubstitute: iExercise = substitute as iExercise;
       let newExerciseSubstitute = new ExerciseEntity();
       newExerciseSubstitute.name = exerciseSubstitute.name;
-      newExerciseSubstitute.description = exerciseSubstitute.description;
-      newExerciseSubstitute.instructions = exerciseSubstitute.instructions;
-      newExerciseSubstitute.tips = exerciseSubstitute.tips;
+      newExerciseSubstitute.description = exerciseSubstitute.description
+        ? exerciseSubstitute.description
+        : '';
+      newExerciseSubstitute.instructions = exerciseSubstitute.instructions
+        ? exerciseSubstitute.instructions
+        : '';
+      newExerciseSubstitute.tips = exerciseSubstitute.tips
+        ? exerciseSubstitute.tips
+        : '';
       newExerciseSubstitute.equipment =
         exerciseSubstitute.equipment as unknown as iEquipment[];
       newExerciseSubstitute.muscle_group =
@@ -68,24 +74,15 @@ export class ExerciceRepository implements iExerciceRepository {
     });
 
     newExercise.name = exercise.name;
-    newExercise.description = exercise.description;
-    newExercise.instructions = exercise.instructions;
-    newExercise.tips = exercise.tips;
+    newExercise.description = exercise.description ? exercise.description : '';
+    newExercise.instructions = exercise.instructions
+      ? exercise.instructions
+      : '';
+    newExercise.tips = exercise.tips ? exercise.tips : '';
     newExercise.images = imagesExercise;
     newExercise.equipment = equipments;
     newExercise.muscle_group = muscleGroups;
     newExercise.substitutes = substitutes;
-
-    // const newExercise = this.CustomRepository.create({
-    //   name: exercise.name,
-    //   description: exercise.description,
-    //   equipment: exercise.equipment,
-    //   images: exercise.images,
-    //   instructions: exercise.instructions,
-    //   muscle_group: exercise.muscle_group,
-    //   substitutes: exercise.substitutes,
-    //   tips: exercise.tips,
-    // });
 
     return await this.CustomRepository.save(newExercise);
   }
@@ -94,8 +91,29 @@ export class ExerciceRepository implements iExerciceRepository {
     throw new Error('Method not implemented.');
   }
 
-  findAll(params?: SearchParams): Promise<iList<iExercise>> {
-    throw new Error('Method not implemented.');
+  async findAll({ limit, page }: SearchParams): Promise<iList<iExercise>> {
+    const queryPage: number = page ? page : 1;
+    const queryLimit: number = limit ? limit : 10;
+
+    const [exercises, count] = await this.CustomRepository.createQueryBuilder(
+      'exercise'
+    )
+      .leftJoinAndSelect('exercise.equipment', 'equipment')
+      .leftJoinAndSelect('exercise.muscle_group', 'muscle_group')
+      .leftJoinAndSelect('exercise.substitutes', 'substitutes')
+      .leftJoinAndSelect('exercise.images', 'images')
+      .skip(queryLimit * (queryPage - 1))
+      .take(queryLimit)
+      .getManyAndCount();
+
+    const result: iList<iExercise> = {
+      current_page: queryPage,
+      data: exercises,
+      per_page: queryLimit,
+      total_registers: count,
+    };
+
+    return result;
   }
 
   findById(id: number): Promise<iExercise | null> {
