@@ -5,20 +5,21 @@ import { ExerciceRepository } from '../../../../adapters/Exercise.Repository';
 import { ImageExerciceRepository } from '../../../../adapters/ImageExercise.Repository';
 import { iExercise } from '../../../../core/Entities/iExercise';
 import { iCreateImageExercise } from '../../../../core/Entities/iImageExercise';
-import { iExerciceRepository } from '../../../../core/Repositories/iExercise.Repository';
+import { iExerciseRepository } from '../../../../core/Repositories/iExercise.Repository';
 import { iImageExerciceRepository } from '../../../../core/Repositories/iImageExercise.Repository';
 import CreateExerciseUseCase from '../../../../core/UseCases/Exercise/CreateExercise';
+import FindByIdExerciseUseCase from '../../../../core/UseCases/Exercise/FindByIdExercise';
 import ListExerciseUseCase from '../../../../core/UseCases/Exercise/ListExercise';
 import AppError from '../../../http/ErrorHandlers';
 import { removeLocalFiles } from '../../../utils/UploadImage';
 import { removeCircularReferencesExercise } from '../../../utils/removeCircularReference';
 
 export class ExerciseController implements iController {
-  private repository: iExerciceRepository;
+  private repository: iExerciseRepository;
   private imageRepository: iImageExerciceRepository;
   private createUseCase: CreateExerciseUseCase;
   private listUseCase: ListExerciseUseCase;
-  // private findUseCase: FindByIdEquipmentsUseCase;
+  private findUseCase: FindByIdExerciseUseCase;
   // private findByNameUseCase: FindByNameEquipmentUseCase;
   // private updateUseCase: UpdateEquipmentsUseCase;
   // private removeUseCase: DeleteEquipmentsUseCase;
@@ -29,12 +30,12 @@ export class ExerciseController implements iController {
     this.createUseCase = new CreateExerciseUseCase(this.repository);
     this.create = this.create.bind(this);
     this.listUseCase = new ListExerciseUseCase(this.repository);
-    // this.findUseCase = new FindByIdEquipmentsUseCase(this.repository);
+    this.findUseCase = new FindByIdExerciseUseCase(this.repository);
     // this.findByNameUseCase = new FindByNameEquipmentUseCase(this.repository);
     // this.updateUseCase = new UpdateEquipmentsUseCase(this.repository);
     // this.removeUseCase = new DeleteEquipmentsUseCase(this.repository);
     this.list = this.list.bind(this);
-    // this.show = this.show.bind(this);
+    this.show = this.show.bind(this);
     // this.save = this.save.bind(this);
     // this.remove = this.remove.bind(this);
   }
@@ -78,7 +79,7 @@ export class ExerciseController implements iController {
       files.map((image) => {
         imagesUploaded.push({
           name: image.filename,
-          link: `${req.protocol}: //${req.get('host')}/uploads/images/${
+          link: `${req.protocol}://${req.get('host')}/v1/images/${
             image.filename
           }`,
         });
@@ -145,7 +146,41 @@ export class ExerciseController implements iController {
   }
 
   async show(req: Request, res: Response): Promise<Response> {
-    throw new Error('not implemented');
+    const { id } = req.params;
+
+    try {
+      let exercise: iExercise | iExercise[] | null;
+      const isNumber: boolean = !isNaN(Number(id));
+
+      exercise = await this.findUseCase.execute(Number(id));
+      // if (isNumber) {
+      //   exercise = await this.findUseCase.execute(Number(id));
+      // } else {
+      //   exercise = await this.findByNameUseCase.execute(id);
+      // }
+
+      if (!exercise) {
+        return res
+          .status(STATUS_CODE.NOT_FOUND)
+          .json({ result: 'Equipamento não encontrado' });
+      }
+
+      return res.status(STATUS_CODE.SUCCESS).json(exercise);
+    } catch (e) {
+      console.error('Error controller: ' + e);
+
+      if (e instanceof AppError) {
+        return res.status(e.statusCode).send({ error: e.message });
+      } else if (e instanceof Error) {
+        return res
+          .status(STATUS_CODE.INTERNAL_SERVER_ERROR)
+          .send({ error: e.message });
+      } else {
+        return res
+          .status(STATUS_CODE.INTERNAL_SERVER_ERROR)
+          .send({ error: String(e) });
+      }
+    }
   }
 
   async save(req: Request, res: Response): Promise<Response> {

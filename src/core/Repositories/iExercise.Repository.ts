@@ -4,7 +4,7 @@ import { iExercise } from '../Entities/iExercise';
 import { iImageExercise } from '../Entities/iImageExercise';
 import { iMuscleGroup } from '../Entities/iMuscleGroup';
 
-export interface iExerciceRepository {
+export interface iExerciseRepository {
   findAll(params?: SearchParams): Promise<iList<iExercise>>;
 
   findById(id: number): Promise<iExercise | null>;

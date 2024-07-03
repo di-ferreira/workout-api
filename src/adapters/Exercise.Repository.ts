@@ -4,14 +4,14 @@ import { iEquipment } from '../core/Entities/iEquipment';
 import { iExercise } from '../core/Entities/iExercise';
 import { iImageExercise } from '../core/Entities/iImageExercise';
 import { iMuscleGroup } from '../core/Entities/iMuscleGroup';
-import { iExerciceRepository } from '../core/Repositories/iExercise.Repository';
+import { iExerciseRepository } from '../core/Repositories/iExercise.Repository';
 import { AppDataSource } from '../infra/database/typeorm/AppDataSource';
 import EquipmentEntity from '../infra/database/typeorm/Entities/Equipment';
 import ExerciseEntity from '../infra/database/typeorm/Entities/Exercise';
 import ImageExerciseEntity from '../infra/database/typeorm/Entities/ImageExercise';
 import MuscleGroupEntity from '../infra/database/typeorm/Entities/MuscleGroup';
 
-export class ExerciceRepository implements iExerciceRepository {
+export class ExerciceRepository implements iExerciseRepository {
   private CustomRepository: Repository<ExerciseEntity>;
 
   constructor() {
@@ -116,8 +116,18 @@ export class ExerciceRepository implements iExerciceRepository {
     return result;
   }
 
-  findById(id: number): Promise<iExercise | null> {
-    throw new Error('Method not implemented.');
+  async findById(id: number): Promise<iExercise | null> {
+    // return await this.CustomRepository.findOneBy({ id });
+    const result: iExercise | null =
+      await this.CustomRepository.createQueryBuilder('exercise')
+        .where('exercise.id =:id', { id })
+        .leftJoinAndSelect('exercise.equipment', 'equipment')
+        .leftJoinAndSelect('exercise.muscle_group', 'muscle_group')
+        .leftJoinAndSelect('exercise.substitutes', 'substitutes')
+        .leftJoinAndSelect('exercise.images', 'images')
+        .getOne();
+
+    return result;
   }
 
   deleteExercice(exercise: iExercise): Promise<void> {

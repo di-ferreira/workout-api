@@ -1,10 +1,10 @@
 import { iExercise } from '@/core/Entities/iExercise';
-import { iExerciceRepository } from 'src/core/Repositories/iExercise.Repository';
+import { iExerciseRepository } from 'src/core/Repositories/iExercise.Repository';
 import { iList, SearchParams } from '../../../@types/workout';
 
 export default class ListExerciseUseCase {
-  private exerciceRepository: iExerciceRepository;
-  constructor(repository: iExerciceRepository) {
+  private exerciceRepository: iExerciseRepository;
+  constructor(repository: iExerciseRepository) {
     this.exerciceRepository = repository;
   }
 

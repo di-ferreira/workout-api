@@ -1,7 +1,7 @@
 import { iEquipment } from '@/core/Entities/iEquipment';
 import { iEquipmentRepository } from 'src/core/Repositories/iEquipment.Repository';
 
-export default class FindByIdEquipmentsUseCase {
+export default class FindByNameEquipmentsUseCase {
   private EquipmentRepository: iEquipmentRepository;
   constructor(repository: iEquipmentRepository) {
     this.EquipmentRepository = repository;
