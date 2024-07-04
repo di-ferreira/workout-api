@@ -9,6 +9,7 @@ import { iExerciseRepository } from '../../../../core/Repositories/iExercise.Rep
 import { iImageExerciceRepository } from '../../../../core/Repositories/iImageExercise.Repository';
 import CreateExerciseUseCase from '../../../../core/UseCases/Exercise/CreateExercise';
 import FindByIdExerciseUseCase from '../../../../core/UseCases/Exercise/FindByIdExercise';
+import FindByNameExerciseUseCase from '../../../../core/UseCases/Exercise/FindByNameExercise';
 import ListExerciseUseCase from '../../../../core/UseCases/Exercise/ListExercise';
 import AppError from '../../../http/ErrorHandlers';
 import { removeLocalFiles } from '../../../utils/UploadImage';
@@ -20,7 +21,7 @@ export class ExerciseController implements iController {
   private createUseCase: CreateExerciseUseCase;
   private listUseCase: ListExerciseUseCase;
   private findUseCase: FindByIdExerciseUseCase;
-  // private findByNameUseCase: FindByNameEquipmentUseCase;
+  private findByNameUseCase: FindByNameExerciseUseCase;
   // private updateUseCase: UpdateEquipmentsUseCase;
   // private removeUseCase: DeleteEquipmentsUseCase;
 
@@ -31,7 +32,7 @@ export class ExerciseController implements iController {
     this.create = this.create.bind(this);
     this.listUseCase = new ListExerciseUseCase(this.repository);
     this.findUseCase = new FindByIdExerciseUseCase(this.repository);
-    // this.findByNameUseCase = new FindByNameEquipmentUseCase(this.repository);
+    this.findByNameUseCase = new FindByNameExerciseUseCase(this.repository);
     // this.updateUseCase = new UpdateEquipmentsUseCase(this.repository);
     // this.removeUseCase = new DeleteEquipmentsUseCase(this.repository);
     this.list = this.list.bind(this);
@@ -152,17 +153,17 @@ export class ExerciseController implements iController {
       let exercise: iExercise | iExercise[] | null;
       const isNumber: boolean = !isNaN(Number(id));
 
-      exercise = await this.findUseCase.execute(Number(id));
-      // if (isNumber) {
-      //   exercise = await this.findUseCase.execute(Number(id));
-      // } else {
-      //   exercise = await this.findByNameUseCase.execute(id);
-      // }
+      // exercise = await this.findUseCase.execute(Number(id));
+      if (isNumber) {
+        exercise = await this.findUseCase.execute(Number(id));
+      } else {
+        exercise = await this.findByNameUseCase.execute(id);
+      }
 
-      if (!exercise) {
+      if (!exercise || (exercise as iExercise[]).length < 1) {
         return res
           .status(STATUS_CODE.NOT_FOUND)
-          .json({ result: 'Equipamento não encontrado' });
+          .json({ result: 'Nenhum exercício não encontrado' });
       }
 
       return res.status(STATUS_CODE.SUCCESS).json(exercise);

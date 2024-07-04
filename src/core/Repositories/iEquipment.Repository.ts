@@ -1,3 +1,4 @@
+import { SearchParams, iList } from '../../@types/workout';
 import { iCreateEquipment, iEquipment } from '../Entities/iEquipment';
 
 export interface iEquipmentRepository {

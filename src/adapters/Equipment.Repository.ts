@@ -1,4 +1,4 @@
-import { Repository } from 'typeorm';
+import { Like, Repository } from 'typeorm';
 import { iList, SearchParams } from '../@types/workout';
 import { iCreateEquipment, iEquipment } from '../core/Entities/iEquipment';
 import { iEquipmentRepository } from '../core/Repositories/iEquipment.Repository';
@@ -16,7 +16,10 @@ export class EquipmentRepository implements iEquipmentRepository {
     name,
     description_name,
   }: iCreateEquipment): Promise<iEquipment[]> {
-    return await this.CustomRepository.findBy([{ name }, { description_name }]);
+    return await this.CustomRepository.findBy([
+      { name: Like(`%${name}%`) },
+      { description_name: Like(`%${description_name}%`) },
+    ]);
   }
 
   async findAll({ page, limit }: SearchParams): Promise<iList<iEquipment>> {

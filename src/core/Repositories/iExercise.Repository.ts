@@ -9,6 +9,8 @@ export interface iExerciseRepository {
 
   findById(id: number): Promise<iExercise | null>;
 
+  findByName(name: string): Promise<iExercise[]>;
+
   createExercice(exercise: iExercise): Promise<iExercise>;
 
   saveExercice(exercise: iExercise): Promise<iExercise>;

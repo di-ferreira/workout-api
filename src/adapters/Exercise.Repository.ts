@@ -117,7 +117,6 @@ export class ExerciceRepository implements iExerciseRepository {
   }
 
   async findById(id: number): Promise<iExercise | null> {
-    // return await this.CustomRepository.findOneBy({ id });
     const result: iExercise | null =
       await this.CustomRepository.createQueryBuilder('exercise')
         .where('exercise.id =:id', { id })
@@ -126,6 +125,20 @@ export class ExerciceRepository implements iExerciseRepository {
         .leftJoinAndSelect('exercise.substitutes', 'substitutes')
         .leftJoinAndSelect('exercise.images', 'images')
         .getOne();
+
+    return result;
+  }
+
+  async findByName(name: string): Promise<iExercise[]> {
+    const result: iExercise[] = await this.CustomRepository.createQueryBuilder(
+      'exercise'
+    )
+      .where('exercise.name like :name', { name: `%${name}%` })
+      .leftJoinAndSelect('exercise.equipment', 'equipment')
+      .leftJoinAndSelect('exercise.muscle_group', 'muscle_group')
+      .leftJoinAndSelect('exercise.substitutes', 'substitutes')
+      .leftJoinAndSelect('exercise.images', 'images')
+      .getMany();
 
     return result;
   }
