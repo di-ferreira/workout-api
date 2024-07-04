@@ -87,8 +87,77 @@ export class ExerciceRepository implements iExerciseRepository {
     return await this.CustomRepository.save(newExercise);
   }
 
-  saveExercice(exercise: iExercise): Promise<iExercise> {
-    throw new Error('Method not implemented.');
+  async saveExercice(exercise: iExercise): Promise<iExercise> {
+    const newExercise = new ExerciseEntity();
+
+    const equipments: iEquipment[] = exercise.equipment.map((equipment) => {
+      const eq: iEquipment = equipment as iEquipment;
+      const newEquipment = new EquipmentEntity();
+      newEquipment.name = eq.name;
+      newEquipment.description_name = eq.description_name;
+      eq.id && (newEquipment.id = eq.id);
+      return newEquipment;
+    });
+
+    const muscleGroups: iMuscleGroup[] = exercise.muscle_group.map((group) => {
+      const muscleGroup: iMuscleGroup = group as iMuscleGroup;
+      const newMuscleGroup = new MuscleGroupEntity();
+      newMuscleGroup.name = muscleGroup.name;
+      newMuscleGroup.description_name = muscleGroup.description_name;
+      muscleGroup.id && (newMuscleGroup.id = muscleGroup.id);
+      return newMuscleGroup;
+    });
+
+    const imagesExercise: iImageExercise[] = exercise.images.map((image) => {
+      const imageExercise: iImageExercise = image as iImageExercise;
+      const newImageExercise = new ImageExerciseEntity();
+      newImageExercise.name = imageExercise.name;
+      newImageExercise.exercise = newExercise;
+      newImageExercise.link = imageExercise.link;
+      // imageExercise.id && (newImageExercise.id = imageExercise.id);
+      return newImageExercise;
+    });
+
+    const substitutes: iExercise[] = exercise.substitutes.map((substitute) => {
+      const exerciseSubstitute: iExercise = substitute as iExercise;
+      let newExerciseSubstitute = new ExerciseEntity();
+      newExerciseSubstitute.name = exerciseSubstitute.name;
+      newExerciseSubstitute.description = exerciseSubstitute.description
+        ? exerciseSubstitute.description
+        : '';
+      newExerciseSubstitute.instructions = exerciseSubstitute.instructions
+        ? exerciseSubstitute.instructions
+        : '';
+      newExerciseSubstitute.tips = exerciseSubstitute.tips
+        ? exerciseSubstitute.tips
+        : '';
+      newExerciseSubstitute.equipment =
+        exerciseSubstitute.equipment as unknown as iEquipment[];
+      newExerciseSubstitute.muscle_group =
+        exerciseSubstitute.muscle_group as unknown as iMuscleGroup[];
+      newExerciseSubstitute.substitutes =
+        exerciseSubstitute.substitutes as unknown as iExercise[];
+      exerciseSubstitute.id &&
+        (newExerciseSubstitute.id = exerciseSubstitute.id);
+      return newExerciseSubstitute;
+    });
+
+    newExercise.id = exercise.id;
+    newExercise.name = exercise.name;
+    newExercise.description = exercise.description ? exercise.description : '';
+    newExercise.instructions = exercise.instructions
+      ? exercise.instructions
+      : '';
+    newExercise.tips = exercise.tips ? exercise.tips : '';
+    newExercise.images = imagesExercise;
+    newExercise.equipment = equipments;
+    newExercise.muscle_group = muscleGroups;
+    newExercise.substitutes = substitutes;
+
+    // console.log('repository', newExercise);
+
+    const result = await this.CustomRepository.save(newExercise);
+    return result;
   }
 
   async findAll({ limit, page }: SearchParams): Promise<iList<iExercise>> {
@@ -143,8 +212,8 @@ export class ExerciceRepository implements iExerciseRepository {
     return result;
   }
 
-  deleteExercice(exercise: iExercise): Promise<void> {
-    throw new Error('Method not implemented.');
+  async deleteExercice(exercise: iExercise): Promise<void> {
+    await this.CustomRepository.delete(exercise.id!);
   }
 
   addImage(image: iImageExercise | iImageExercise[]): Promise<iExercise> {
