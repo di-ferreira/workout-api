@@ -3,8 +3,12 @@ import { STATUS_CODE } from '../../../../@types';
 import { iController } from '../../../../@types/workout';
 import { ExerciceRepository } from '../../../../adapters/Exercise.Repository';
 import { ImageExerciceRepository } from '../../../../adapters/ImageExercise.Repository';
+import { iEquipment } from '../../../../core/Entities/iEquipment';
 import { iExercise } from '../../../../core/Entities/iExercise';
-import { iCreateImageExercise } from '../../../../core/Entities/iImageExercise';
+import {
+  iCreateImageExercise,
+  iImageExercise,
+} from '../../../../core/Entities/iImageExercise';
 import { iExerciseRepository } from '../../../../core/Repositories/iExercise.Repository';
 import { iImageExerciceRepository } from '../../../../core/Repositories/iImageExercise.Repository';
 import CreateExerciseUseCase from '../../../../core/UseCases/Exercise/CreateExercise';
@@ -15,6 +19,10 @@ import UpdateExerciseUseCase from '../../../../core/UseCases/Exercise/UpdateExer
 import AppError from '../../../http/ErrorHandlers';
 import { removeLocalFiles } from '../../../utils/UploadImage';
 import { removeCircularReferencesExercise } from '../../../utils/removeCircularReference';
+import {
+  createExerciseValidation,
+  updateExerciseValidation,
+} from '../../../validations/Exercise.validation';
 
 export class ExerciseController implements iController {
   private repository: iExerciseRepository;
@@ -62,20 +70,11 @@ export class ExerciseController implements iController {
         instructions,
         tips,
         muscle_group: JSON.parse(muscle_group),
-        equipment: JSON.parse(equipment),
-        substitutes: JSON.parse(substitutes),
+        equipment: JSON.parse(equipment) ?? ([] as iEquipment[]),
+        substitutes: JSON.parse(substitutes) ?? ([] as iExercise[]),
         images: [],
         id: 0,
       };
-
-      // TODO validations Exercises
-      // const validationObj = createEquipmentValidation.safeParse(newEquipment);
-
-      // if (!validationObj.success) {
-      //   return res.status(STATUS_CODE.BAD_REQUEST).send({
-      //     error: validationObj.error.issues[0].message,
-      //   });
-      // }
 
       const imagesUploaded: iCreateImageExercise[] = [];
       files.map((image) => {
@@ -87,12 +86,37 @@ export class ExerciseController implements iController {
         });
       });
 
-      newExercise.images = imagesUploaded;
+      newExercise.images = imagesUploaded ?? ([] as iImageExercise[]);
+
+      const existsExercises: iExercise[] = await this.repository.findByName(
+        newExercise.name
+      );
+
+      if (existsExercises.length > 0) {
+        return res.status(STATUS_CODE.BAD_REQUEST).json({
+          error: 'Exists Exercise with this name!',
+          result: existsExercises,
+        });
+      }
+
+      const validationObj = createExerciseValidation.safeParse(newExercise);
+
+      if (!validationObj.success) {
+        if (files) {
+          removeLocalFiles(files);
+        }
+        return res.status(STATUS_CODE.BAD_REQUEST).send({
+          error: validationObj.error.issues[0].message,
+        });
+      }
+
       const createdExercise = await this.createUseCase.execute(newExercise);
+
       const result = JSON.stringify(
         createdExercise,
         removeCircularReferencesExercise
       );
+
       return res
         .status(STATUS_CODE.CREATED)
         .json({ result: JSON.parse(result) });
@@ -154,7 +178,6 @@ export class ExerciseController implements iController {
       let exercise: iExercise | iExercise[] | null;
       const isNumber: boolean = !isNaN(Number(id));
 
-      // exercise = await this.findUseCase.execute(Number(id));
       if (isNumber) {
         exercise = await this.findUseCase.execute(Number(id));
       } else {
@@ -199,7 +222,6 @@ export class ExerciseController implements iController {
 
     const files = req.files as Express.Multer.File[];
     try {
-      // TODO
       const newExercise: iExercise = {
         id: Number(id),
         name,
@@ -207,22 +229,17 @@ export class ExerciseController implements iController {
         instructions,
         tips,
         muscle_group: JSON.parse(muscle_group),
-        equipment: JSON.parse(equipment),
-        substitutes: JSON.parse(substitutes),
+        equipment: JSON.parse(equipment) ?? ([] as iEquipment[]),
+        substitutes: JSON.parse(substitutes) ?? ([] as iExercise[]),
         images: [],
       };
-
-      // const validationObj = updateEquipmentValidation.safeParse(newEquipment);
-
-      // if (!validationObj.success) {
-      //   return res.status(STATUS_CODE.BAD_REQUEST).send({
-      //     error: validationObj.error.issues[0].message,
-      //   });
-      // }
 
       const exercise = await this.findUseCase.execute(Number(id));
 
       if (!exercise) {
+        if (files) {
+          removeLocalFiles(files);
+        }
         return res
           .status(STATUS_CODE.NOT_FOUND)
           .json({ result: 'Exercise not found' });
@@ -238,11 +255,19 @@ export class ExerciseController implements iController {
         });
       });
 
-      newExercise.name = exercise.name;
       newExercise.images = [...exercise.images, ...imagesUploaded];
-      newExercise.equipment = exercise.equipment;
-      newExercise.muscle_group = exercise.muscle_group;
-      newExercise.substitutes = exercise.substitutes;
+
+      const validationObj = updateExerciseValidation.safeParse(newExercise);
+
+      if (!validationObj.success) {
+        if (files) {
+          removeLocalFiles(files);
+        }
+
+        return res.status(STATUS_CODE.BAD_REQUEST).send({
+          error: validationObj.error.issues[0].message,
+        });
+      }
 
       const updatedExercise = await this.updateUseCase.execute(newExercise);
       const result = JSON.stringify(
