@@ -38,4 +38,8 @@ export class ImageExerciceRepository implements iImageExerciceRepository {
   deleteImageExercice(imageExercise: iImageExercise): Promise<void> {
     throw new Error('Method not implemented.');
   }
+
+  async deleteImageExerciceByExercise(exerciseId: number): Promise<void> {
+    await this.CustomRepository.delete({ exercise: { id: exerciseId } });
+  }
 }

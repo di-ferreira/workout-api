@@ -11,11 +11,13 @@ export interface iExerciseRepository {
 
   findByName(name: string): Promise<iExercise[]>;
 
+  findSubstituterByExerciseID(id: number): Promise<iExercise[]>;
+
   createExercice(exercise: iExercise): Promise<iExercise>;
 
   saveExercice(exercise: iExercise): Promise<iExercise>;
 
-  deleteExercice(exercise: iExercise): Promise<void>;
+  deleteExercice(exerciseId: number): Promise<void>;
 
   addImage(image: iImageExercise | iImageExercise[]): Promise<iExercise>;
 

@@ -13,4 +13,6 @@ export interface iImageExerciceRepository {
   saveExercice(imageExercise: iImageExercise): Promise<iImageExercise>;
 
   deleteImageExercice(imageExercise: iImageExercise): Promise<void>;
+
+  deleteImageExerciceByExercise(exerciseId: number): Promise<void>;
 }

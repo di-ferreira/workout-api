@@ -34,19 +34,19 @@ class ExerciseEntity implements iExercise {
   @OneToMany(
     () => ImageExerciseEntity,
     (imageExercise) => imageExercise.exercise,
-    { cascade: true }
+    { cascade: ['insert'], onDelete: 'CASCADE' }
   )
   images!: iImageExercise[];
 
-  @ManyToMany(() => ExerciseEntity, { cascade: ['insert'] })
+  @ManyToMany(() => ExerciseEntity, { cascade: ['insert', 'update'] })
   @JoinTable()
   substitutes!: iExercise[];
 
-  @ManyToMany(() => MuscleGroupEntity, { cascade: ['insert'] })
+  @ManyToMany(() => MuscleGroupEntity, { cascade: ['insert', 'update'] })
   @JoinTable()
   muscle_group!: iMuscleGroup[];
 
-  @ManyToMany(() => EquipmentEntity, { cascade: ['insert'] })
+  @ManyToMany(() => EquipmentEntity, { cascade: ['insert', 'update'] })
   @JoinTable()
   equipment!: iEquipment[];
 }

@@ -15,6 +15,7 @@ import CreateExerciseUseCase from '../../../../core/UseCases/Exercise/CreateExer
 import FindByIdExerciseUseCase from '../../../../core/UseCases/Exercise/FindByIdExercise';
 import FindByNameExerciseUseCase from '../../../../core/UseCases/Exercise/FindByNameExercise';
 import ListExerciseUseCase from '../../../../core/UseCases/Exercise/ListExercise';
+import RemoveExerciseUseCase from '../../../../core/UseCases/Exercise/RemoveExercise';
 import UpdateExerciseUseCase from '../../../../core/UseCases/Exercise/UpdateExercise';
 import AppError from '../../../http/ErrorHandlers';
 import { removeLocalFiles } from '../../../utils/UploadImage';
@@ -32,7 +33,7 @@ export class ExerciseController implements iController {
   private findUseCase: FindByIdExerciseUseCase;
   private findByNameUseCase: FindByNameExerciseUseCase;
   private updateUseCase: UpdateExerciseUseCase;
-  // private removeUseCase: DeleteEquipmentsUseCase;
+  private removeUseCase: RemoveExerciseUseCase;
 
   constructor() {
     this.repository = new ExerciceRepository();
@@ -42,12 +43,12 @@ export class ExerciseController implements iController {
     this.findUseCase = new FindByIdExerciseUseCase(this.repository);
     this.findByNameUseCase = new FindByNameExerciseUseCase(this.repository);
     this.updateUseCase = new UpdateExerciseUseCase(this.repository);
-    // this.removeUseCase = new DeleteEquipmentsUseCase(this.repository);
+    this.removeUseCase = new RemoveExerciseUseCase(this.repository);
     this.create = this.create.bind(this);
     this.list = this.list.bind(this);
     this.show = this.show.bind(this);
     this.save = this.save.bind(this);
-    // this.remove = this.remove.bind(this);
+    this.remove = this.remove.bind(this);
   }
 
   async create(req: Request, res: Response): Promise<Response> {
@@ -299,6 +300,61 @@ export class ExerciseController implements iController {
   }
 
   async remove(req: Request, res: Response): Promise<Response> {
-    throw new Error('not implemented');
+    const { id } = req.params;
+
+    try {
+      let exercise: iExercise | iExercise[] | null;
+      const isNumber: boolean = !isNaN(Number(id));
+
+      if (!isNumber) {
+        return res
+          .status(STATUS_CODE.BAD_REQUEST)
+          .json({ result: 'ID is not a number' });
+      }
+
+      exercise = await this.findUseCase.execute(Number(id));
+
+      if (!exercise) {
+        return res
+          .status(STATUS_CODE.NOT_FOUND)
+          .json({ result: 'Not found Exercise' });
+      }
+
+      await this.imageRepository.deleteImageExerciceByExercise(exercise.id);
+
+      exercise.equipment = [];
+      exercise.muscle_group = [];
+      exercise.substitutes = [];
+
+      await this.updateUseCase.execute(exercise);
+      await this.removeUseCase.execute(exercise.id);
+
+      const filesToRemove: Express.Multer.File[] = exercise.images.map(
+        (image) => {
+          return {
+            filename: image.name,
+          };
+        }
+      ) as Express.Multer.File[];
+
+      removeLocalFiles(filesToRemove);
+      return res
+        .status(STATUS_CODE.SUCCESS)
+        .json({ result: 'Success remove Exercise!' });
+    } catch (e) {
+      console.error('Error controller: ' + e);
+
+      if (e instanceof AppError) {
+        return res.status(e.statusCode).send({ error: e.message });
+      } else if (e instanceof Error) {
+        return res
+          .status(STATUS_CODE.INTERNAL_SERVER_ERROR)
+          .send({ error: e.message });
+      } else {
+        return res
+          .status(STATUS_CODE.INTERNAL_SERVER_ERROR)
+          .send({ error: String(e) });
+      }
+    }
   }
 }

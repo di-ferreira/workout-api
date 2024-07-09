@@ -212,8 +212,19 @@ export class ExerciceRepository implements iExerciseRepository {
     return result;
   }
 
-  async deleteExercice(exercise: iExercise): Promise<void> {
-    await this.CustomRepository.delete(exercise.id!);
+  async findSubstituterByExerciseID(id: number): Promise<iExercise[]> {
+    const result: iExercise[] = await this.CustomRepository.createQueryBuilder(
+      'exercise'
+    )
+      .where('exercise.substitutes.id = :id', { id })
+      .leftJoinAndSelect('exercise.substitutes', 'substitutes')
+      .getMany();
+
+    return result;
+  }
+
+  async deleteExercice(exerciseId: number): Promise<void> {
+    await this.CustomRepository.delete(exerciseId);
   }
 
   addImage(image: iImageExercise | iImageExercise[]): Promise<iExercise> {

@@ -13,7 +13,9 @@ class ImageExerciseEntity implements iImageExercise {
   @Column({ type: 'varchar', length: 150 })
   link!: string;
 
-  @ManyToOne(() => ExerciseEntity, (exercise) => exercise.images)
+  @ManyToOne(() => ExerciseEntity, (exercise) => exercise.images, {
+    onDelete: 'CASCADE',
+  })
   exercise!: iExercise;
 }
 
