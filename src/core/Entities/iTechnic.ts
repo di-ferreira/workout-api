@@ -1,4 +1,4 @@
-export interface iTechnics extends iCreateTechnic {
+export interface iTechnic extends iCreateTechnic {
   id: number;
 }
 

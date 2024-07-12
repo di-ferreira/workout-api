@@ -10,12 +10,14 @@ import EquipmentEntity from './Entities/Equipment';
 import ExerciseEntity from './Entities/Exercise';
 import ImageExerciseEntity from './Entities/ImageExercise';
 import MuscleGroupEntity from './Entities/MuscleGroup';
+import TechnicEntity from './Entities/Technic';
 
 const EntityClasses: MixedList<Function | string | EntitySchema> = [
   EquipmentEntity,
   MuscleGroupEntity,
   ImageExerciseEntity,
   ExerciseEntity,
+  TechnicEntity,
 ];
 
 let DSConfig: DataSourceOptions;
