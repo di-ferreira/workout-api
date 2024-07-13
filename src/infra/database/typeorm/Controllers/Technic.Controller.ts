@@ -5,44 +5,55 @@ import { TechnicRepository } from '../../../../adapters/Technic.Repository';
 import { iTechnic } from '../../../../core/Entities/iTechnic';
 import { iTechnicRepository } from '../../../../core/Repositories/iTechnic.Repository';
 import CreateTechnicUseCase from '../../../../core/UseCases/Technic/CreateTechnicUseCase';
+import FindByIdTechnicUseCase from '../../../../core/UseCases/Technic/FindByIdTechnicUseCase';
+import FindByNameTechnicUseCase from '../../../../core/UseCases/Technic/FindByNameTechnicUseCase';
+import ListTechnicUseCase from '../../../../core/UseCases/Technic/ListTechnicUseCase';
+import RemoveTechnicUseCase from '../../../../core/UseCases/Technic/RemoveTechnicUseCase';
+import UpdateTechnicUseCase from '../../../../core/UseCases/Technic/UpdateTechnicUseCase';
 import AppError from '../../../http/ErrorHandlers';
+import {
+  createTechnicValidation,
+  updateTechnicValidation,
+} from '../../../validations/Technic.validation';
 
 export class TechnicController implements iController {
   private repository: iTechnicRepository;
   private createUseCase: CreateTechnicUseCase;
-  // private listUseCase: ListExerciseUseCase;
-  // private findUseCase: FindByIdExerciseUseCase;
-  // private updateUseCase: UpdateExerciseUseCase;
-  // private removeUseCase: RemoveExerciseUseCase;
+  private listUseCase: ListTechnicUseCase;
+  private findUseCase: FindByIdTechnicUseCase;
+  private findByNameUseCase: FindByNameTechnicUseCase;
+  private updateUseCase: UpdateTechnicUseCase;
+  private removeUseCase: RemoveTechnicUseCase;
 
   constructor() {
     this.repository = new TechnicRepository();
     this.createUseCase = new CreateTechnicUseCase(this.repository);
-    // this.listUseCase = new ListExerciseUseCase(this.repository);
-    // this.findUseCase = new FindByIdExerciseUseCase(this.repository);
-    // this.updateUseCase = new UpdateExerciseUseCase(this.repository);
-    // this.removeUseCase = new RemoveExerciseUseCase(this.repository);
+    this.listUseCase = new ListTechnicUseCase(this.repository);
+    this.findUseCase = new FindByIdTechnicUseCase(this.repository);
+    this.findByNameUseCase = new FindByNameTechnicUseCase(this.repository);
+    this.updateUseCase = new UpdateTechnicUseCase(this.repository);
+    this.removeUseCase = new RemoveTechnicUseCase(this.repository);
     this.create = this.create.bind(this);
-    // this.list = this.list.bind(this);
-    // this.show = this.show.bind(this);
-    // this.save = this.save.bind(this);
-    // this.remove = this.remove.bind(this);
+    this.list = this.list.bind(this);
+    this.show = this.show.bind(this);
+    this.save = this.save.bind(this);
+    this.remove = this.remove.bind(this);
   }
 
   async list(req: Request, res: Response): Promise<Response> {
     const { page, limit } = req.query;
 
     try {
-      const listEquipment = await this.listUseCase.execute({
+      const listTechnics = await this.listUseCase.execute({
         page: Number(page),
         limit: Number(limit),
       });
 
-      if (listEquipment.total_registers === 0) {
-        return res.status(STATUS_CODE.NO_CONTENT).json(listEquipment);
+      if (listTechnics.total_registers === 0) {
+        return res.status(STATUS_CODE.NO_CONTENT).json(listTechnics);
       }
 
-      return res.status(STATUS_CODE.SUCCESS).json(listEquipment);
+      return res.status(STATUS_CODE.SUCCESS).json(listTechnics);
     } catch (e) {
       console.error('Error controller: ' + e);
 
@@ -64,22 +75,22 @@ export class TechnicController implements iController {
     const { id } = req.params;
 
     try {
-      let equipment: iTechnic | iTechnic[] | null;
+      let technic: iTechnic | iTechnic[] | null;
       const isNumber: boolean = !isNaN(Number(id));
 
       if (isNumber) {
-        equipment = await this.findUseCase.execute(Number(id));
+        technic = await this.findUseCase.execute(Number(id));
       } else {
-        equipment = await this.findByNameUseCase.execute(id);
+        technic = await this.findByNameUseCase.execute(id);
       }
 
-      if (!equipment) {
+      if (!technic) {
         return res
           .status(STATUS_CODE.NOT_FOUND)
-          .json({ result: 'Equipamento não encontrado' });
+          .json({ result: 'Technic not found' });
       }
 
-      return res.status(STATUS_CODE.SUCCESS).json(equipment);
+      return res.status(STATUS_CODE.SUCCESS).json(technic);
     } catch (e) {
       console.error('Error controller: ' + e);
 
@@ -106,13 +117,13 @@ export class TechnicController implements iController {
         description,
       };
 
-      // const validationObj = createTechnicValidation.safeParse(newTechnic);
+      const validationObj = createTechnicValidation.safeParse(newTechnic);
 
-      // if (!validationObj.success) {
-      //   return res.status(STATUS_CODE.BAD_REQUEST).send({
-      //     error: validationObj.error.issues[0].message,
-      //   });
-      // }
+      if (!validationObj.success) {
+        return res.status(STATUS_CODE.BAD_REQUEST).send({
+          error: validationObj.error.issues[0].message,
+        });
+      }
 
       const existsTechnics: iTechnic[] = await this.repository.findByName({
         name: newTechnic.name,
@@ -155,7 +166,7 @@ export class TechnicController implements iController {
         description,
       };
 
-      const validationObj = updateEquipmentValidation.safeParse(newTechnic);
+      const validationObj = updateTechnicValidation.safeParse(newTechnic);
 
       if (!validationObj.success) {
         return res.status(STATUS_CODE.BAD_REQUEST).send({
@@ -163,12 +174,12 @@ export class TechnicController implements iController {
         });
       }
 
-      const equipment = await this.findUseCase.execute(Number(id));
+      const technic = await this.findUseCase.execute(Number(id));
 
-      if (!equipment) {
+      if (!technic) {
         return res
           .status(STATUS_CODE.NOT_FOUND)
-          .json({ result: 'Equipment not found' });
+          .json({ result: 'Technic not found' });
       }
 
       const result = await this.updateUseCase.execute(newTechnic);
@@ -194,18 +205,18 @@ export class TechnicController implements iController {
   async remove(req: Request, res: Response): Promise<Response> {
     const { id } = req.params;
     try {
-      const equipment = await this.findUseCase.execute(Number(id));
+      const technic = await this.findUseCase.execute(Number(id));
 
-      if (!equipment) {
+      if (!technic) {
         return res
           .status(STATUS_CODE.NOT_FOUND)
-          .json({ result: 'Equipamento não encontrado' });
+          .json({ result: 'Technic not fount!' });
       }
-      await this.removeUseCase.execute(equipment);
+      await this.removeUseCase.execute(technic);
 
       return res
         .status(STATUS_CODE.SUCCESS)
-        .json({ result: 'Success removed Equipment!' });
+        .json({ result: 'Success removed Technic!' });
     } catch (e) {
       console.error('Error controller: ' + e);
 
