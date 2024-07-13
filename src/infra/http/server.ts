@@ -1,7 +1,7 @@
 import cors from 'cors';
 import 'dotenv/config';
-import express, { NextFunction, Request, Response } from 'express';
-import AppError from './ErrorHandlers';
+import express from 'express';
+import { errorMiddleware } from './middlewares/Error';
 import routes from './routes';
 
 const app = express();
@@ -11,24 +11,7 @@ app.use('/v1', routes);
 
 const port = process.env.PORT;
 
-app.use(
-  (
-    error: Error,
-    _request: Request,
-    response: Response,
-    _next: NextFunction
-  ) => {
-    if (error instanceof AppError) {
-      return response
-        .status(error.statusCode)
-        .json({ status: 'error', message: error.message });
-    }
-
-    return response
-      .status(500)
-      .json({ status: 'error', message: 'Internal server error!' });
-  }
-);
+app.use(errorMiddleware);
 
 export function initServer() {
   app.listen(port, () => console.log(`🏆 server running on port ${port}`));

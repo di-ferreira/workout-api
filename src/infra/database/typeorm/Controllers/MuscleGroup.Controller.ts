@@ -10,7 +10,7 @@ import UseCaseFindByIdMuscleGroup from '../../../../core/UseCases/MuscleGroup/Fi
 import UseCaseFindNameMuscleGroup from '../../../../core/UseCases/MuscleGroup/FindByNameMuscleGroup';
 import UseCaseListMuscleGroup from '../../../../core/UseCases/MuscleGroup/ListMuscleGroup';
 import UseCaseUpdateMuscleGroup from '../../../../core/UseCases/MuscleGroup/UpdateMuscleGroup';
-import AppError from '../../../http/ErrorHandlers';
+import { BadRequestError, NotFoundError } from '../../../helpers/ApiErrors';
 import {
   createMuscleGroupValidation,
   updateMuscleGroupValidation,
@@ -41,197 +41,102 @@ export class MuscleGroupController implements iController {
   }
 
   async create(req: Request, res: Response): Promise<Response> {
-    try {
-      const { name, description_name } = req.body;
-      const newMuscleGroup: iMuscleGroup = {
-        id: 0,
-        name,
-        description_name,
-      };
-      const validationObj =
-        createMuscleGroupValidation.safeParse(newMuscleGroup);
+    const { name, description_name } = req.body;
+    const newMuscleGroup: iMuscleGroup = {
+      id: 0,
+      name,
+      description_name,
+    };
+    const validationObj = createMuscleGroupValidation.safeParse(newMuscleGroup);
 
-      if (!validationObj.success) {
-        return res.status(STATUS_CODE.BAD_REQUEST).send({
-          error: validationObj.error.issues[0].message,
-        });
-      }
+    if (!validationObj.success)
+      throw new BadRequestError(validationObj.error.issues[0].message);
 
-      const existsMuscleGroup: iMuscleGroup[] =
-        await this.repository.findByName({
-          name: newMuscleGroup.name,
-          description_name: newMuscleGroup.description_name,
-        });
+    const existsMuscleGroup: iMuscleGroup[] = await this.repository.findByName({
+      name: newMuscleGroup.name,
+      description_name: newMuscleGroup.description_name,
+    });
 
-      if (existsMuscleGroup.length > 0) {
-        return res.status(STATUS_CODE.BAD_REQUEST).json({
-          error: 'Exists Muscle Group with this name!',
-          result: existsMuscleGroup,
-        });
-      }
-
-      const result = await this.createUseCase.execute(newMuscleGroup);
-      return res.status(STATUS_CODE.CREATED).json({ result });
-    } catch (e) {
-      console.error('Error controller: ' + e);
-
-      if (e instanceof AppError) {
-        return res.status(e.statusCode).send({ error: e.message });
-      } else if (e instanceof Error) {
-        return res
-          .status(STATUS_CODE.INTERNAL_SERVER_ERROR)
-          .send({ error: e.message });
-      } else {
-        return res
-          .status(STATUS_CODE.INTERNAL_SERVER_ERROR)
-          .send({ error: String(e) });
-      }
+    if (existsMuscleGroup.length > 0) {
+      return res.status(STATUS_CODE.BAD_REQUEST).json({
+        error: 'Exists Muscle Group with this name!',
+        result: existsMuscleGroup,
+      });
     }
+
+    const result = await this.createUseCase.execute(newMuscleGroup);
+    return res.status(STATUS_CODE.CREATED).json({ result });
   }
 
   async list(req: Request, res: Response): Promise<Response> {
     const { page, limit } = req.query;
 
-    try {
-      const listEquipment = await this.listUseCase.execute({
-        page: Number(page),
-        limit: Number(limit),
-      });
+    const listEquipment = await this.listUseCase.execute({
+      page: Number(page),
+      limit: Number(limit),
+    });
 
-      if (listEquipment.total_registers === 0) {
-        return res.status(STATUS_CODE.NO_CONTENT).json(listEquipment);
-      }
-
-      return res.status(STATUS_CODE.SUCCESS).json(listEquipment);
-    } catch (e) {
-      console.error('Error controller: ' + e);
-
-      if (e instanceof AppError) {
-        return res.status(e.statusCode).send({ error: e.message });
-      } else if (e instanceof Error) {
-        return res
-          .status(STATUS_CODE.INTERNAL_SERVER_ERROR)
-          .send({ error: e.message });
-      } else {
-        return res
-          .status(STATUS_CODE.INTERNAL_SERVER_ERROR)
-          .send({ error: String(e) });
-      }
+    if (listEquipment.total_registers === 0) {
+      return res.status(STATUS_CODE.NO_CONTENT).json(listEquipment);
     }
+
+    return res.status(STATUS_CODE.SUCCESS).json(listEquipment);
   }
 
   async show(req: Request, res: Response): Promise<Response> {
     const { id } = req.params;
 
-    try {
-      let muscleGroup: iMuscleGroup | iMuscleGroup[] | null;
-      const isNumber: boolean = !isNaN(Number(id));
+    let muscleGroup: iMuscleGroup | iMuscleGroup[] | null;
+    const isNumber: boolean = !isNaN(Number(id));
 
-      if (isNumber) {
-        muscleGroup = await this.findByIdUseCase.execute(Number(id));
-      } else {
-        muscleGroup = await this.findByNameUseCase.execute(id);
-      }
-
-      if (!muscleGroup) {
-        return res
-          .status(STATUS_CODE.NOT_FOUND)
-          .json({ result: 'Muscle Group not found!' });
-      }
-
-      return res.status(STATUS_CODE.SUCCESS).json(muscleGroup);
-    } catch (e) {
-      console.error('Error controller: ' + e);
-
-      if (e instanceof AppError) {
-        return res.status(e.statusCode).send({ error: e.message });
-      } else if (e instanceof Error) {
-        return res
-          .status(STATUS_CODE.INTERNAL_SERVER_ERROR)
-          .send({ error: e.message });
-      } else {
-        return res
-          .status(STATUS_CODE.INTERNAL_SERVER_ERROR)
-          .send({ error: String(e) });
-      }
+    if (isNumber) {
+      muscleGroup = await this.findByIdUseCase.execute(Number(id));
+    } else {
+      muscleGroup = await this.findByNameUseCase.execute(id);
     }
+
+    if (!muscleGroup) throw new NotFoundError('Muscle Group not found!');
+
+    return res.status(STATUS_CODE.SUCCESS).json(muscleGroup);
   }
 
   async save(req: Request, res: Response): Promise<Response> {
     const { id } = req.params;
-    try {
-      const { name, description_name } = req.body;
-      const newMuscleGroup: iMuscleGroup = {
-        id: Number(id),
-        name,
-        description_name,
-      };
 
-      const validationObj =
-        updateMuscleGroupValidation.safeParse(newMuscleGroup);
+    const { name, description_name } = req.body;
+    const newMuscleGroup: iMuscleGroup = {
+      id: Number(id),
+      name,
+      description_name,
+    };
 
-      if (!validationObj.success) {
-        return res.status(STATUS_CODE.BAD_REQUEST).send({
-          error: validationObj.error.issues[0].message,
-        });
-      }
-      const muscleGroup = await this.findByIdUseCase.execute(Number(id));
+    const validationObj = updateMuscleGroupValidation.safeParse(newMuscleGroup);
 
-      if (!muscleGroup) {
-        return res
-          .status(STATUS_CODE.NOT_FOUND)
-          .json({ result: 'Muscle Group not found' });
-      }
+    if (!validationObj.success)
+      throw new BadRequestError(validationObj.error.issues[0].message);
 
-      const result = await this.updateUseCase.execute(newMuscleGroup);
+    const muscleGroup = await this.findByIdUseCase.execute(Number(id));
 
-      return res.status(STATUS_CODE.SUCCESS).json({ result });
-    } catch (e) {
-      console.error('Error controller: ' + e);
+    if (!muscleGroup) throw new NotFoundError('Muscle Group not found!');
 
-      if (e instanceof AppError) {
-        return res.status(e.statusCode).send({ error: e.message });
-      } else if (e instanceof Error) {
-        return res
-          .status(STATUS_CODE.INTERNAL_SERVER_ERROR)
-          .send({ error: e.message });
-      } else {
-        return res
-          .status(STATUS_CODE.INTERNAL_SERVER_ERROR)
-          .send({ error: String(e) });
-      }
-    }
+    const result = await this.updateUseCase.execute(newMuscleGroup);
+
+    return res.status(STATUS_CODE.SUCCESS).json({ result });
   }
 
   async remove(req: Request, res: Response): Promise<Response> {
     const { id } = req.params;
-    try {
+   
       const muscleGroup = await this.findByIdUseCase.execute(Number(id));
 
-      if (!muscleGroup) {
-        return res
-          .status(STATUS_CODE.NOT_FOUND)
-          .json({ result: 'Muscle Group not found' });
-      }
+    if (!muscleGroup)
+      throw new NotFoundError('Muscle Group not found!');
+    
       await this.removeUseCase.execute(muscleGroup);
 
       return res
         .status(STATUS_CODE.SUCCESS)
         .json({ result: 'Success removed Muscle Group!' });
-    } catch (e) {
-      console.error('Error controller: ' + e);
-
-      if (e instanceof AppError) {
-        return res.status(e.statusCode).send({ error: e.message });
-      } else if (e instanceof Error) {
-        return res
-          .status(STATUS_CODE.INTERNAL_SERVER_ERROR)
-          .send({ error: e.message });
-      } else {
-        return res
-          .status(STATUS_CODE.INTERNAL_SERVER_ERROR)
-          .send({ error: String(e) });
-      }
-    }
+    
   }
 }

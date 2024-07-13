@@ -10,6 +10,7 @@ import FindByNameTechnicUseCase from '../../../../core/UseCases/Technic/FindByNa
 import ListTechnicUseCase from '../../../../core/UseCases/Technic/ListTechnicUseCase';
 import RemoveTechnicUseCase from '../../../../core/UseCases/Technic/RemoveTechnicUseCase';
 import UpdateTechnicUseCase from '../../../../core/UseCases/Technic/UpdateTechnicUseCase';
+import { BadRequestError, NotFoundError } from '../../../helpers/ApiErrors';
 import AppError from '../../../http/ErrorHandlers';
 import {
   createTechnicValidation,
@@ -42,33 +43,16 @@ export class TechnicController implements iController {
 
   async list(req: Request, res: Response): Promise<Response> {
     const { page, limit } = req.query;
+    const listTechnics = await this.listUseCase.execute({
+      page: Number(page),
+      limit: Number(limit),
+    });
 
-    try {
-      const listTechnics = await this.listUseCase.execute({
-        page: Number(page),
-        limit: Number(limit),
-      });
-
-      if (listTechnics.total_registers === 0) {
-        return res.status(STATUS_CODE.NO_CONTENT).json(listTechnics);
-      }
-
-      return res.status(STATUS_CODE.SUCCESS).json(listTechnics);
-    } catch (e) {
-      console.error('Error controller: ' + e);
-
-      if (e instanceof AppError) {
-        return res.status(e.statusCode).send({ error: e.message });
-      } else if (e instanceof Error) {
-        return res
-          .status(STATUS_CODE.INTERNAL_SERVER_ERROR)
-          .send({ error: e.message });
-      } else {
-        return res
-          .status(STATUS_CODE.INTERNAL_SERVER_ERROR)
-          .send({ error: String(e) });
-      }
+    if (listTechnics.total_registers === 0) {
+      return res.status(STATUS_CODE.NO_CONTENT).json(listTechnics);
     }
+
+    return res.status(STATUS_CODE.SUCCESS).json(listTechnics);
   }
 
   async show(req: Request, res: Response): Promise<Response> {
@@ -109,128 +93,68 @@ export class TechnicController implements iController {
   }
 
   async create(req: Request, res: Response): Promise<Response> {
-    try {
-      const { name, description } = req.body;
-      const newTechnic: iTechnic = {
-        id: 0,
-        name,
-        description,
-      };
+    const { name, description } = req.body;
+    const newTechnic: iTechnic = {
+      id: 0,
+      name,
+      description,
+    };
 
-      const validationObj = createTechnicValidation.safeParse(newTechnic);
+    const validationObj = createTechnicValidation.safeParse(newTechnic);
 
-      if (!validationObj.success) {
-        return res.status(STATUS_CODE.BAD_REQUEST).send({
-          error: validationObj.error.issues[0].message,
-        });
-      }
+    if (!validationObj.success)
+      throw new BadRequestError(validationObj.error.issues[0].message);
 
-      const existsTechnics: iTechnic[] = await this.repository.findByName({
-        name: newTechnic.name,
-        description: newTechnic.description,
+    const existsTechnics: iTechnic[] = await this.repository.findByName({
+      name: newTechnic.name,
+      description: newTechnic.description,
+    });
+
+    if (existsTechnics.length > 0) {
+      return res.status(STATUS_CODE.BAD_REQUEST).json({
+        error: 'Exists Technic with this name!',
+        result: existsTechnics,
       });
-
-      if (existsTechnics.length > 0) {
-        return res.status(STATUS_CODE.BAD_REQUEST).json({
-          error: 'Exists Technic with this name!',
-          result: existsTechnics,
-        });
-      }
-
-      const result = await this.createUseCase.execute(newTechnic);
-      return res.status(STATUS_CODE.CREATED).json({ result });
-    } catch (e) {
-      console.error('Error controller: ' + e);
-
-      if (e instanceof AppError) {
-        return res.status(e.statusCode).send({ error: e.message });
-      } else if (e instanceof Error) {
-        return res
-          .status(STATUS_CODE.INTERNAL_SERVER_ERROR)
-          .send({ error: e.message });
-      } else {
-        return res
-          .status(STATUS_CODE.INTERNAL_SERVER_ERROR)
-          .send({ error: String(e) });
-      }
     }
+
+    const result = await this.createUseCase.execute(newTechnic);
+    return res.status(STATUS_CODE.CREATED).json({ result });
   }
 
   async save(req: Request, res: Response): Promise<Response> {
     const { id } = req.params;
-    try {
-      const { name, description } = req.body;
-      const newTechnic: iTechnic = {
-        id: Number(id),
-        name,
-        description,
-      };
 
-      const validationObj = updateTechnicValidation.safeParse(newTechnic);
+    const { name, description } = req.body;
+    const newTechnic: iTechnic = {
+      id: Number(id),
+      name,
+      description,
+    };
 
-      if (!validationObj.success) {
-        return res.status(STATUS_CODE.BAD_REQUEST).send({
-          error: validationObj.error.issues[0].message,
-        });
-      }
+    const validationObj = updateTechnicValidation.safeParse(newTechnic);
 
-      const technic = await this.findUseCase.execute(Number(id));
+    if (!validationObj.success)
+      throw new BadRequestError(validationObj.error.issues[0].message);
 
-      if (!technic) {
-        return res
-          .status(STATUS_CODE.NOT_FOUND)
-          .json({ result: 'Technic not found' });
-      }
+    const technic = await this.findUseCase.execute(Number(id));
 
-      const result = await this.updateUseCase.execute(newTechnic);
+    if (!technic) throw new NotFoundError('Technic not found');
 
-      return res.status(STATUS_CODE.SUCCESS).json({ result });
-    } catch (e) {
-      console.error('Error controller: ' + e);
+    const result = await this.updateUseCase.execute(newTechnic);
 
-      if (e instanceof AppError) {
-        return res.status(e.statusCode).send({ error: e.message });
-      } else if (e instanceof Error) {
-        return res
-          .status(STATUS_CODE.INTERNAL_SERVER_ERROR)
-          .send({ error: e.message });
-      } else {
-        return res
-          .status(STATUS_CODE.INTERNAL_SERVER_ERROR)
-          .send({ error: String(e) });
-      }
-    }
+    return res.status(STATUS_CODE.SUCCESS).json({ result });
   }
 
   async remove(req: Request, res: Response): Promise<Response> {
     const { id } = req.params;
-    try {
-      const technic = await this.findUseCase.execute(Number(id));
 
-      if (!technic) {
-        return res
-          .status(STATUS_CODE.NOT_FOUND)
-          .json({ result: 'Technic not fount!' });
-      }
-      await this.removeUseCase.execute(technic);
+    const technic = await this.findUseCase.execute(Number(id));
 
-      return res
-        .status(STATUS_CODE.SUCCESS)
-        .json({ result: 'Success removed Technic!' });
-    } catch (e) {
-      console.error('Error controller: ' + e);
+    if (!technic) throw new NotFoundError('Technic not found');
+    await this.removeUseCase.execute(technic);
 
-      if (e instanceof AppError) {
-        return res.status(e.statusCode).send({ error: e.message });
-      } else if (e instanceof Error) {
-        return res
-          .status(STATUS_CODE.INTERNAL_SERVER_ERROR)
-          .send({ error: e.message });
-      } else {
-        return res
-          .status(STATUS_CODE.INTERNAL_SERVER_ERROR)
-          .send({ error: String(e) });
-      }
-    }
+    return res
+      .status(STATUS_CODE.SUCCESS)
+      .json({ result: 'Success removed Technic!' });
   }
 }

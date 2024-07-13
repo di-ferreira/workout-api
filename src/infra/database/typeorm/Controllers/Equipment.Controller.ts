@@ -10,7 +10,7 @@ import FindByIdEquipmentsUseCase from '../../../../core/UseCases/Equipment/FindB
 import FindByNameEquipmentUseCase from '../../../../core/UseCases/Equipment/FindByNameEquipment';
 import ListEquipmentsUseCase from '../../../../core/UseCases/Equipment/ListEquipments';
 import UpdateEquipmentsUseCase from '../../../../core/UseCases/Equipment/UpdateEquipment';
-import AppError from '../../../http/ErrorHandlers';
+import { BadRequestError, NotFoundError } from '../../../helpers/ApiErrors';
 import {
   createEquipmentValidation,
   updateEquipmentValidation,
@@ -43,194 +43,97 @@ export class EquipmentController implements iController {
   async list(req: Request, res: Response): Promise<Response> {
     const { page, limit } = req.query;
 
-    try {
-      const listEquipment = await this.listUseCase.execute({
-        page: Number(page),
-        limit: Number(limit),
-      });
+    const listEquipment = await this.listUseCase.execute({
+      page: Number(page),
+      limit: Number(limit),
+    });
 
-      if (listEquipment.total_registers === 0) {
-        return res.status(STATUS_CODE.NO_CONTENT).json(listEquipment);
-      }
-
-      return res.status(STATUS_CODE.SUCCESS).json(listEquipment);
-    } catch (e) {
-      console.error('Error controller: ' + e);
-
-      if (e instanceof AppError) {
-        return res.status(e.statusCode).send({ error: e.message });
-      } else if (e instanceof Error) {
-        return res
-          .status(STATUS_CODE.INTERNAL_SERVER_ERROR)
-          .send({ error: e.message });
-      } else {
-        return res
-          .status(STATUS_CODE.INTERNAL_SERVER_ERROR)
-          .send({ error: String(e) });
-      }
+    if (listEquipment.total_registers === 0) {
+      return res.status(STATUS_CODE.NO_CONTENT).json(listEquipment);
     }
+
+    return res.status(STATUS_CODE.SUCCESS).json(listEquipment);
   }
 
   async show(req: Request, res: Response): Promise<Response> {
     const { id } = req.params;
 
-    try {
-      let equipment: iEquipment | iEquipment[] | null;
-      const isNumber: boolean = !isNaN(Number(id));
+    let equipment: iEquipment | iEquipment[] | null;
+    const isNumber: boolean = !isNaN(Number(id));
 
-      if (isNumber) {
-        equipment = await this.findUseCase.execute(Number(id));
-      } else {
-        equipment = await this.findByNameUseCase.execute(id);
-      }
-
-      if (!equipment) {
-        return res
-          .status(STATUS_CODE.NOT_FOUND)
-          .json({ result: 'Equipamento não encontrado' });
-      }
-
-      return res.status(STATUS_CODE.SUCCESS).json(equipment);
-    } catch (e) {
-      console.error('Error controller: ' + e);
-
-      if (e instanceof AppError) {
-        return res.status(e.statusCode).send({ error: e.message });
-      } else if (e instanceof Error) {
-        return res
-          .status(STATUS_CODE.INTERNAL_SERVER_ERROR)
-          .send({ error: e.message });
-      } else {
-        return res
-          .status(STATUS_CODE.INTERNAL_SERVER_ERROR)
-          .send({ error: String(e) });
-      }
+    if (isNumber) {
+      equipment = await this.findUseCase.execute(Number(id));
+    } else {
+      equipment = await this.findByNameUseCase.execute(id);
     }
+
+    if (!equipment) throw new NotFoundError('Equipment not found');
+
+    return res.status(STATUS_CODE.SUCCESS).json(equipment);
   }
 
   async create(req: Request, res: Response): Promise<Response> {
-    try {
-      const { name, description_name } = req.body;
-      const newEquipment: iEquipment = {
-        id: 0,
-        name,
-        description_name,
-      };
+    const { name, description_name } = req.body;
+    const newEquipment: iEquipment = {
+      id: 0,
+      name,
+      description_name,
+    };
 
-      const validationObj = createEquipmentValidation.safeParse(newEquipment);
+    const validationObj = createEquipmentValidation.safeParse(newEquipment);
 
-      if (!validationObj.success) {
-        return res.status(STATUS_CODE.BAD_REQUEST).send({
-          error: validationObj.error.issues[0].message,
-        });
-      }
+    if (!validationObj.success)
+      throw new BadRequestError(validationObj.error.issues[0].message);
 
-      const existsEquipments: iEquipment[] = await this.repository.findByName({
-        name: newEquipment.name,
-        description_name: newEquipment.description_name,
+    const existsEquipments: iEquipment[] = await this.repository.findByName({
+      name: newEquipment.name,
+      description_name: newEquipment.description_name,
+    });
+
+    if (existsEquipments.length > 0) {
+      return res.status(STATUS_CODE.BAD_REQUEST).json({
+        error: 'Exists Equipments with this name!',
+        result: existsEquipments,
       });
-
-      if (existsEquipments.length > 0) {
-        return res.status(STATUS_CODE.BAD_REQUEST).json({
-          error: 'Exists Equipments with this name!',
-          result: existsEquipments,
-        });
-      }
-
-      const result = await this.createUseCase.execute(newEquipment);
-      return res.status(STATUS_CODE.CREATED).json({ result });
-    } catch (e) {
-      console.error('Error controller: ' + e);
-
-      if (e instanceof AppError) {
-        return res.status(e.statusCode).send({ error: e.message });
-      } else if (e instanceof Error) {
-        return res
-          .status(STATUS_CODE.INTERNAL_SERVER_ERROR)
-          .send({ error: e.message });
-      } else {
-        return res
-          .status(STATUS_CODE.INTERNAL_SERVER_ERROR)
-          .send({ error: String(e) });
-      }
     }
+
+    const result = await this.createUseCase.execute(newEquipment);
+    return res.status(STATUS_CODE.CREATED).json({ result });
   }
 
   async save(req: Request, res: Response): Promise<Response> {
     const { id } = req.params;
-    try {
-      const { name, description_name } = req.body;
-      const newEquipment: iEquipment = {
-        id: Number(id),
-        name,
-        description_name,
-      };
+    const { name, description_name } = req.body;
+    const newEquipment: iEquipment = {
+      id: Number(id),
+      name,
+      description_name,
+    };
 
-      const validationObj = updateEquipmentValidation.safeParse(newEquipment);
+    const validationObj = updateEquipmentValidation.safeParse(newEquipment);
 
-      if (!validationObj.success) {
-        return res.status(STATUS_CODE.BAD_REQUEST).send({
-          error: validationObj.error.issues[0].message,
-        });
-      }
+    if (!validationObj.success)
+      throw new BadRequestError(validationObj.error.issues[0].message);
 
-      const equipment = await this.findUseCase.execute(Number(id));
+    const equipment = await this.findUseCase.execute(Number(id));
 
-      if (!equipment) {
-        return res
-          .status(STATUS_CODE.NOT_FOUND)
-          .json({ result: 'Equipment not found' });
-      }
+    if (!equipment) throw new NotFoundError('Equipment not found');
 
-      const result = await this.updateUseCase.execute(newEquipment);
+    const result = await this.updateUseCase.execute(newEquipment);
 
-      return res.status(STATUS_CODE.SUCCESS).json({ result });
-    } catch (e) {
-      console.error('Error controller: ' + e);
-
-      if (e instanceof AppError) {
-        return res.status(e.statusCode).send({ error: e.message });
-      } else if (e instanceof Error) {
-        return res
-          .status(STATUS_CODE.INTERNAL_SERVER_ERROR)
-          .send({ error: e.message });
-      } else {
-        return res
-          .status(STATUS_CODE.INTERNAL_SERVER_ERROR)
-          .send({ error: String(e) });
-      }
-    }
+    return res.status(STATUS_CODE.SUCCESS).json({ result });
   }
 
   async remove(req: Request, res: Response): Promise<Response> {
     const { id } = req.params;
-    try {
-      const equipment = await this.findUseCase.execute(Number(id));
+    const equipment = await this.findUseCase.execute(Number(id));
 
-      if (!equipment) {
-        return res
-          .status(STATUS_CODE.NOT_FOUND)
-          .json({ result: 'Equipamento não encontrado' });
-      }
-      await this.removeUseCase.execute(equipment);
+    if (!equipment) throw new NotFoundError('Equipment not found');
 
-      return res
-        .status(STATUS_CODE.SUCCESS)
-        .json({ result: 'Success removed Equipment!' });
-    } catch (e) {
-      console.error('Error controller: ' + e);
+    await this.removeUseCase.execute(equipment);
 
-      if (e instanceof AppError) {
-        return res.status(e.statusCode).send({ error: e.message });
-      } else if (e instanceof Error) {
-        return res
-          .status(STATUS_CODE.INTERNAL_SERVER_ERROR)
-          .send({ error: e.message });
-      } else {
-        return res
-          .status(STATUS_CODE.INTERNAL_SERVER_ERROR)
-          .send({ error: String(e) });
-      }
-    }
+    return res
+      .status(STATUS_CODE.SUCCESS)
+      .json({ result: 'Success removed Equipment!' });
   }
 }

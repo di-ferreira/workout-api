@@ -17,9 +17,10 @@ import FindByNameExerciseUseCase from '../../../../core/UseCases/Exercise/FindBy
 import ListExerciseUseCase from '../../../../core/UseCases/Exercise/ListExercise';
 import RemoveExerciseUseCase from '../../../../core/UseCases/Exercise/RemoveExercise';
 import UpdateExerciseUseCase from '../../../../core/UseCases/Exercise/UpdateExercise';
+import { BadRequestError, NotFoundError } from '../../../helpers/ApiErrors';
+import { removeLocalFiles } from '../../../helpers/UploadImage';
+import { removeCircularReferencesExercise } from '../../../helpers/removeCircularReference';
 import AppError from '../../../http/ErrorHandlers';
-import { removeLocalFiles } from '../../../utils/UploadImage';
-import { removeCircularReferencesExercise } from '../../../utils/removeCircularReference';
 import {
   createExerciseValidation,
   updateExerciseValidation,
@@ -106,9 +107,7 @@ export class ExerciseController implements iController {
         if (files) {
           removeLocalFiles(files);
         }
-        return res.status(STATUS_CODE.BAD_REQUEST).send({
-          error: validationObj.error.issues[0].message,
-        });
+        throw new BadRequestError(validationObj.error.issues[0].message);
       }
 
       const createdExercise = await this.createUseCase.execute(newExercise);
@@ -144,69 +143,34 @@ export class ExerciseController implements iController {
   async list(req: Request, res: Response): Promise<Response> {
     const { page, limit } = req.query;
 
-    try {
-      const listExercise = await this.listUseCase.execute({
-        page: Number(page),
-        limit: Number(limit),
-      });
+    const listExercise = await this.listUseCase.execute({
+      page: Number(page),
+      limit: Number(limit),
+    });
 
-      if (listExercise.total_registers === 0) {
-        return res.status(STATUS_CODE.NO_CONTENT).json(listExercise);
-      }
-
-      return res.status(STATUS_CODE.SUCCESS).json(listExercise);
-    } catch (e) {
-      console.error('Error controller: ' + e);
-
-      if (e instanceof AppError) {
-        return res.status(e.statusCode).send({ error: e.message });
-      } else if (e instanceof Error) {
-        return res
-          .status(STATUS_CODE.INTERNAL_SERVER_ERROR)
-          .send({ error: e.message });
-      } else {
-        return res
-          .status(STATUS_CODE.INTERNAL_SERVER_ERROR)
-          .send({ error: String(e) });
-      }
+    if (listExercise.total_registers === 0) {
+      return res.status(STATUS_CODE.NO_CONTENT).json(listExercise);
     }
+
+    return res.status(STATUS_CODE.SUCCESS).json(listExercise);
   }
 
   async show(req: Request, res: Response): Promise<Response> {
     const { id } = req.params;
 
-    try {
-      let exercise: iExercise | iExercise[] | null;
-      const isNumber: boolean = !isNaN(Number(id));
+    let exercise: iExercise | iExercise[] | null;
+    const isNumber: boolean = !isNaN(Number(id));
 
-      if (isNumber) {
-        exercise = await this.findUseCase.execute(Number(id));
-      } else {
-        exercise = await this.findByNameUseCase.execute(id);
-      }
-
-      if (!exercise || (exercise as iExercise[]).length < 1) {
-        return res
-          .status(STATUS_CODE.NOT_FOUND)
-          .json({ result: 'Nenhum exercício não encontrado' });
-      }
-
-      return res.status(STATUS_CODE.SUCCESS).json(exercise);
-    } catch (e) {
-      console.error('Error controller: ' + e);
-
-      if (e instanceof AppError) {
-        return res.status(e.statusCode).send({ error: e.message });
-      } else if (e instanceof Error) {
-        return res
-          .status(STATUS_CODE.INTERNAL_SERVER_ERROR)
-          .send({ error: e.message });
-      } else {
-        return res
-          .status(STATUS_CODE.INTERNAL_SERVER_ERROR)
-          .send({ error: String(e) });
-      }
+    if (isNumber) {
+      exercise = await this.findUseCase.execute(Number(id));
+    } else {
+      exercise = await this.findByNameUseCase.execute(id);
     }
+
+    if (!exercise || (exercise as iExercise[]).length < 1)
+      throw new NotFoundError('Exercise not found');
+
+    return res.status(STATUS_CODE.SUCCESS).json(exercise);
   }
 
   async save(req: Request, res: Response): Promise<Response> {
@@ -241,9 +205,8 @@ export class ExerciseController implements iController {
         if (files) {
           removeLocalFiles(files);
         }
-        return res
-          .status(STATUS_CODE.NOT_FOUND)
-          .json({ result: 'Exercise not found' });
+
+        throw new NotFoundError('Exercise not found');
       }
 
       const imagesUploaded: iCreateImageExercise[] = [];
@@ -264,10 +227,7 @@ export class ExerciseController implements iController {
         if (files) {
           removeLocalFiles(files);
         }
-
-        return res.status(STATUS_CODE.BAD_REQUEST).send({
-          error: validationObj.error.issues[0].message,
-        });
+        throw new BadRequestError(validationObj.error.issues[0].message);
       }
 
       const updatedExercise = await this.updateUseCase.execute(newExercise);
@@ -314,11 +274,7 @@ export class ExerciseController implements iController {
 
       exercise = await this.findUseCase.execute(Number(id));
 
-      if (!exercise) {
-        return res
-          .status(STATUS_CODE.NOT_FOUND)
-          .json({ result: 'Not found Exercise' });
-      }
+      if (!exercise) throw new NotFoundError('Exercise not found');
 
       await this.imageRepository.deleteImageExerciceByExercise(exercise.id);
 

@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { ExerciseController } from '../../database/typeorm/Controllers/Exercise.Controller';
-import { upload } from '../../utils/UploadImage';
+import { upload } from '../../helpers/UploadImage';
 
 const ExerciseRoutes = Router();
 
