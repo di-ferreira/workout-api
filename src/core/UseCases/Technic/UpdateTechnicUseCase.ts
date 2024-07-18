@@ -1,12 +1,12 @@
 import { iTechnic } from '../../Entities/iTechnic';
 import { iTechnicRepository } from '../../Repositories/iTechnic.Repository';
 export default class UpdateTechnicUseCase {
-  private EquipmentRepository: iTechnicRepository;
+  private TechnicRepository: iTechnicRepository;
   constructor(repository: iTechnicRepository) {
-    this.EquipmentRepository = repository;
+    this.TechnicRepository = repository;
   }
 
   async execute(technic: iTechnic): Promise<iTechnic> {
-    return await this.EquipmentRepository.saveTechnic(technic);
+    return await this.TechnicRepository.saveTechnic(technic);
   }
 }
