@@ -1,14 +1,14 @@
 import { iExercise } from './iExercise';
-import { iTechnics } from './iTechnic';
+import { iTechnic } from './iTechnic';
 
 export interface iSet {
   id: number;
 }
 
 export interface iCreateSet {
-  weight: number;
-  reps: number;
-  rest: number;
+  weight?: number;
+  reps?: number;
+  rest?: number;
 }
 
 export interface iSeries {
@@ -19,6 +19,6 @@ export interface iCreateSeries {
   exercise: iExercise | iExercise[];
   maximum_reps: number;
   minimum_reps: number;
-  technics?: iTechnics | iTechnics[];
+  technics?: iTechnic | iTechnic[];
   sets: iSet[];
 }
