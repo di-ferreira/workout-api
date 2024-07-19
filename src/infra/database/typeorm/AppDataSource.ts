@@ -11,6 +11,7 @@ import ExerciseEntity from './Entities/Exercise';
 import ImageExerciseEntity from './Entities/ImageExercise';
 import MuscleGroupEntity from './Entities/MuscleGroup';
 import TechnicEntity from './Entities/Technic';
+import UserEntity from './Entities/User';
 
 const EntityClasses: MixedList<Function | string | EntitySchema> = [
   EquipmentEntity,
@@ -18,6 +19,7 @@ const EntityClasses: MixedList<Function | string | EntitySchema> = [
   ImageExerciseEntity,
   ExerciseEntity,
   TechnicEntity,
+  UserEntity,
 ];
 
 let DSConfig: DataSourceOptions;

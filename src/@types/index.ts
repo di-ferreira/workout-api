@@ -16,6 +16,7 @@ export const ERROR_MESSAGE = {
   REQUIRED_ERROR: 'is required',
   MINIMUM_LENGTH_ERROR: 'or more characters at least',
   URL_ERROR: 'Invalid url',
+  FORMAT_ERROR: 'Invalid format',
 };
 
 const muscleGroups = {

@@ -40,10 +40,10 @@ export const updateTechnicValidation: z.ZodType<iTechnic> = z.object({
     .min(2, { message: `2 ${ERROR_MESSAGE.MINIMUM_LENGTH_ERROR}` }),
 });
 
-export type createEquipmentValidationRepository = z.infer<
+export type createTechnicValidationRepository = z.infer<
   typeof createTechnicValidation
 >;
 
-export type updateEquipmentValidationRepository = z.infer<
+export type updateTechnicValidationRepository = z.infer<
   typeof updateTechnicValidation
 >;

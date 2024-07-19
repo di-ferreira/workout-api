@@ -1,8 +1,10 @@
 export interface iUser extends iCreateUser {
-  id: string;
+  id: number;
 }
 
-export type iUserRole = 'admin' | 'editor' | 'user';
+export const aUserRole = ['admin', 'editor', 'user'] as const;
+
+export type iUserRole = (typeof aUserRole)[number];
 
 export interface iCreateUser {
   name: string;
