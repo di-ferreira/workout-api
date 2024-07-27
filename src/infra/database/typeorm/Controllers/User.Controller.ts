@@ -12,6 +12,7 @@ import ListUsersUseCase from '../../../../core/UseCases/User/ListUsersUseCase';
 import RemoveUserUseCase from '../../../../core/UseCases/User/RemoveUserUseCase';
 import UpdateUserUseCase from '../../../../core/UseCases/User/UpdateUserUseCase';
 import { BadRequestError } from '../../../helpers/ApiErrors';
+import { generateHash } from '../../../helpers/passwordUtils';
 import { createUserValidation } from '../../../validations/User.validation';
 
 export class UserController implements iController {
@@ -54,8 +55,6 @@ export class UserController implements iController {
     const validationObj = createUserValidation.safeParse(newUser);
 
     if (!validationObj.success) {
-      console.log('Invalid', validationObj.error.issues[0].message);
-
       throw new BadRequestError(validationObj.error.issues[0].message);
     }
 
@@ -70,23 +69,30 @@ export class UserController implements iController {
       });
     }
 
+    newUser.password = await generateHash(newUser.password);
+
     const result = await this.createUseCase.execute(newUser);
-    return res.status(STATUS_CODE.CREATED).json({ result });
+    return res.status(STATUS_CODE.CREATED).json({
+      id: result.id,
+      name: result.name,
+      email: result.email,
+      role: result.role,
+    });
   }
 
-  list(req: Request, res: Response): Promise<Response> {
+  async list(req: Request, res: Response): Promise<Response> {
     throw new Error('Method not implemented.');
   }
 
-  show(req: Request, res: Response): Promise<Response> {
+  async show(req: Request, res: Response): Promise<Response> {
     throw new Error('Method not implemented.');
   }
 
-  save(req: Request, res: Response): Promise<Response> {
+  async save(req: Request, res: Response): Promise<Response> {
     throw new Error('Method not implemented.');
   }
 
-  remove(req: Request, res: Response): Promise<Response> {
+  async remove(req: Request, res: Response): Promise<Response> {
     throw new Error('Method not implemented.');
   }
 }
