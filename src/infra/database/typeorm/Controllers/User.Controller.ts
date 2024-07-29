@@ -11,7 +11,7 @@ import FindUserByNameUseCase from '../../../../core/UseCases/User/FindUserByName
 import ListUsersUseCase from '../../../../core/UseCases/User/ListUsersUseCase';
 import RemoveUserUseCase from '../../../../core/UseCases/User/RemoveUserUseCase';
 import UpdateUserUseCase from '../../../../core/UseCases/User/UpdateUserUseCase';
-import { BadRequestError } from '../../../helpers/ApiErrors';
+import { BadRequestError, NotFoundError } from '../../../helpers/ApiErrors';
 import { generateHash } from '../../../helpers/passwordUtils';
 import { createUserValidation } from '../../../validations/User.validation';
 
@@ -81,11 +81,36 @@ export class UserController implements iController {
   }
 
   async list(req: Request, res: Response): Promise<Response> {
-    throw new Error('Method not implemented.');
+    const { page, limit } = req.query;
+    const listUsers = await this.listUseCase.execute({
+      page: Number(page),
+      limit: Number(limit),
+    });
+
+    if (listUsers.total_registers === 0) {
+      return res.status(STATUS_CODE.NO_CONTENT).json(listUsers);
+    }
+
+    return res.status(STATUS_CODE.SUCCESS).json(listUsers);
   }
 
   async show(req: Request, res: Response): Promise<Response> {
-    throw new Error('Method not implemented.');
+    const { id } = req.params;
+
+    let user: iUser | iUser[] | null;
+    const isNumber: boolean = !isNaN(Number(id));
+
+    if (isNumber) {
+      user = await this.findUseCase.execute(Number(id));
+    } else {
+      user = await this.findByEmailUseCase.execute(id);
+    }
+
+    if (!user) {
+      throw new NotFoundError('User not found');
+    }
+
+    return res.status(STATUS_CODE.SUCCESS).json(user);
   }
 
   async save(req: Request, res: Response): Promise<Response> {

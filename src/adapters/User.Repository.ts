@@ -1,5 +1,5 @@
 import { iUser } from '@/core/Entities/iUser';
-import { Repository } from 'typeorm';
+import { Like, Repository } from 'typeorm';
 import { iList, SearchParams } from '../@types/workout';
 import { iUserRepository } from '../core/Repositories/iUser.repository';
 import { AppDataSource } from '../infra/database/typeorm/AppDataSource';
@@ -12,12 +12,27 @@ export class UserRepository implements iUserRepository {
     this.CustomRepository = AppDataSource.getRepository(UserEntity);
   }
 
-  findAll(params?: SearchParams): Promise<iList<iUser>> {
-    throw new Error('Method not implemented.');
+  async findAll({ page, limit }: SearchParams): Promise<iList<iUser>> {
+    const queryPage: number = page ? page : 1;
+    const queryLimit: number = limit ? limit : 10;
+
+    const [users, count] = await this.CustomRepository.createQueryBuilder()
+      .skip(queryLimit * (queryPage - 1))
+      .take(queryLimit)
+      .getManyAndCount();
+
+    const result: iList<iUser> = {
+      current_page: queryPage,
+      data: users,
+      per_page: queryLimit,
+      total_registers: count,
+    };
+
+    return result;
   }
 
-  findById(id: number): Promise<iUser | null> {
-    throw new Error('Method not implemented.');
+  async findById(id: number): Promise<iUser | null> {
+    return await this.CustomRepository.findOneBy({ id });
   }
 
   async findByEmail(email: string): Promise<iUser | null> {
@@ -28,8 +43,12 @@ export class UserRepository implements iUserRepository {
     });
   }
 
-  findByName(name: string): Promise<iUser[]> {
-    throw new Error('Method not implemented.');
+  async findByName(name: string): Promise<iUser[]> {
+    return await this.CustomRepository.findBy([
+      {
+        name: Like(`%${name}%`),
+      },
+    ]);
   }
 
   async createUser(user: iUser): Promise<iUser> {
@@ -43,10 +62,18 @@ export class UserRepository implements iUserRepository {
     return result;
   }
 
-  saveUser(user: iUser): Promise<iUser> {
-    throw new Error('Method not implemented.');
+  async saveUser(user: iUser): Promise<iUser> {
+    const result = this.CustomRepository.save({
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      password: user.password,
+      role: user.role,
+    });
+    return result;
   }
-  deleteUser(user: iUser): Promise<void> {
-    throw new Error('Method not implemented.');
+
+  async deleteUser(user: iUser): Promise<void> {
+    await this.CustomRepository.delete(user.id);
   }
 }
