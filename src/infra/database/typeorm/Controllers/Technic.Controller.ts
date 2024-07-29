@@ -11,7 +11,6 @@ import ListTechnicUseCase from '../../../../core/UseCases/Technic/ListTechnicUse
 import RemoveTechnicUseCase from '../../../../core/UseCases/Technic/RemoveTechnicUseCase';
 import UpdateTechnicUseCase from '../../../../core/UseCases/Technic/UpdateTechnicUseCase';
 import { BadRequestError, NotFoundError } from '../../../helpers/ApiErrors';
-import AppError from '../../../http/ErrorHandlers';
 import {
   createTechnicValidation,
   updateTechnicValidation,
@@ -58,38 +57,20 @@ export class TechnicController implements iController {
   async show(req: Request, res: Response): Promise<Response> {
     const { id } = req.params;
 
-    try {
-      let technic: iTechnic | iTechnic[] | null;
-      const isNumber: boolean = !isNaN(Number(id));
+    let technic: iTechnic | iTechnic[] | null;
+    const isNumber: boolean = !isNaN(Number(id));
 
-      if (isNumber) {
-        technic = await this.findUseCase.execute(Number(id));
-      } else {
-        technic = await this.findByNameUseCase.execute(id);
-      }
-
-      if (!technic) {
-        return res
-          .status(STATUS_CODE.NOT_FOUND)
-          .json({ result: 'Technic not found' });
-      }
-
-      return res.status(STATUS_CODE.SUCCESS).json(technic);
-    } catch (e) {
-      console.error('Error controller: ' + e);
-
-      if (e instanceof AppError) {
-        return res.status(e.statusCode).send({ error: e.message });
-      } else if (e instanceof Error) {
-        return res
-          .status(STATUS_CODE.INTERNAL_SERVER_ERROR)
-          .send({ error: e.message });
-      } else {
-        return res
-          .status(STATUS_CODE.INTERNAL_SERVER_ERROR)
-          .send({ error: String(e) });
-      }
+    if (isNumber) {
+      technic = await this.findUseCase.execute(Number(id));
+    } else {
+      technic = await this.findByNameUseCase.execute(id);
     }
+
+    if (!technic) {
+      throw new NotFoundError('Technic not found');
+    }
+
+    return res.status(STATUS_CODE.SUCCESS).json(technic);
   }
 
   async create(req: Request, res: Response): Promise<Response> {
