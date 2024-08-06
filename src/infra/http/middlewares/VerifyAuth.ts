@@ -1,44 +1,28 @@
-import { STATUS_CODE } from '@/@types';
 import { NextFunction, Request, Response } from 'express';
 import { verify } from 'jsonwebtoken';
 import { UserRepository } from '../../../adapters/User.Repository';
 import { iUserRepository } from '../../../core/Repositories/iUser.repository';
-async function isLoggedIn(req: Request, res: Response, next: NextFunction) {
+import { UnauthorizedError } from '../../helpers/ApiErrors';
+
+async function VerifyAuth(req: Request, res: Response, next: NextFunction) {
   const repository: iUserRepository = new UserRepository();
-  try {
-    const { authorization } = req.headers;
-    if (!authorization) {
-      return res
-        .status(STATUS_CODE.UNAUTHORIZED)
-        .json({ error: 'User Unauthorized!' });
-    }
+  const { authorization } = req.headers;
 
-    const accessToken = authorization.split(' ')[0];
-    const payload = verify(accessToken, process.env.JWT_SECRET!);
+  if (!authorization) throw new UnauthorizedError('User Unauthorized!');
 
-    const { id } = payload as any;
+  const [_, accessToken] = authorization.split(' ');
 
-    if (!id) {
-      return res
-        .status(STATUS_CODE.UNAUTHORIZED)
-        .json({ error: 'Invalid token!' });
-    }
-    const user = await repository.findById(id);
-    if (!user) {
-      return res
-        .status(STATUS_CODE.UNAUTHORIZED)
-        .json({ error: 'User not found!' });
-    }
-    // req.user = user;
-    next();
-  } catch (error: any) {
-    if (error.name === 'TokenExpiredError') {
-      return res
-        .status(STATUS_CODE.UNAUTHORIZED)
-        .json({ error: 'User expired!' });
-    }
-    return res
-      .status(STATUS_CODE.INTERNAL_SERVER_ERROR)
-      .json({ error: 'Server error!' });
-  }
+  const payload = verify(accessToken, process.env.JWT_SECRET!);
+
+  const id = payload.sub;
+
+  if (!id) throw new UnauthorizedError('Invalid token!');
+
+  const user = await repository.findById(Number(id));
+
+  if (!user) throw new UnauthorizedError('User not found!');
+
+  next();
 }
+
+export default VerifyAuth;
