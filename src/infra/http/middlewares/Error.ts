@@ -8,6 +8,8 @@ export const errorMiddleware = async (
   res: Response,
   next: NextFunction
 ) => {
+  console.log('error middleware', error);
+
   const statusCode = error.statusCode ?? STATUS_CODE.INTERNAL_SERVER_ERROR;
   const message = error.statusCode ? error.message : 'Internal Server Error';
   res.status(statusCode).json({ message });

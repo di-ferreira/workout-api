@@ -36,11 +36,13 @@ export class UserRepository implements iUserRepository {
   }
 
   async findByEmail(email: string): Promise<iUser | null> {
-    return await this.CustomRepository.findOne({
+    const result = await this.CustomRepository.findOne({
       where: {
         email: email,
       },
     });
+
+    return result;
   }
 
   async findByName(name: string): Promise<iUser[]> {

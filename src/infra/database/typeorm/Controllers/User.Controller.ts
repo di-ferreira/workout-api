@@ -1,4 +1,7 @@
+import { compare } from 'bcrypt';
+import 'dotenv';
 import { Request, Response } from 'express';
+import { sign } from 'jsonwebtoken';
 import { STATUS_CODE } from '../../../../@types/index';
 import { iController } from '../../../../@types/workout';
 import { UserRepository } from '../../../../adapters/User.Repository';
@@ -39,6 +42,7 @@ export class UserController implements iController {
     this.show = this.show.bind(this);
     this.save = this.save.bind(this);
     this.remove = this.remove.bind(this);
+    this.login = this.login.bind(this);
   }
 
   async create(req: Request, res: Response): Promise<Response> {
@@ -119,5 +123,32 @@ export class UserController implements iController {
 
   async remove(req: Request, res: Response): Promise<Response> {
     throw new Error('Method not implemented.');
+  }
+
+  async login(req: Request, res: Response): Promise<Response> {
+    const { email, password } = req.body;
+
+    const existsUser: iUser | null = await this.repository.findByEmail(email);
+
+    if (existsUser === null) {
+      return res.status(STATUS_CODE.BAD_REQUEST).json({
+        error: 'Email or password incorrect!',
+      });
+    }
+
+    const passwordIsValid = await compare(password, existsUser.password);
+
+    if (!passwordIsValid) {
+      return res.status(STATUS_CODE.BAD_REQUEST).json({
+        error: 'Email or password incorrect!',
+      });
+    }
+
+    const token = sign({}, process.env.JWT_SECRET!, {
+      subject: existsUser.id.toString(),
+      expiresIn: process.env.JWT_EXPIRE!,
+    });
+
+    return res.status(STATUS_CODE.SUCCESS).json({ result: token });
   }
 }
