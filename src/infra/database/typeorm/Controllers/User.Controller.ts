@@ -15,7 +15,10 @@ import RemoveUserUseCase from '../../../../core/UseCases/User/RemoveUserUseCase'
 import UpdateUserUseCase from '../../../../core/UseCases/User/UpdateUserUseCase';
 import { BadRequestError, NotFoundError } from '../../../helpers/ApiErrors';
 import { generateHash } from '../../../helpers/passwordUtils';
-import { createUserValidation } from '../../../validations/User.validation';
+import {
+  createUserValidation,
+  updateUserValidation,
+} from '../../../validations/User.validation';
 
 export class UserController implements iController {
   private repository: iUserRepository;
@@ -66,7 +69,11 @@ export class UserController implements iController {
     if (existsUser !== null) {
       return res.status(STATUS_CODE.BAD_REQUEST).json({
         error: 'Exists a User with this email!',
-        result: existsUser,
+        result: {
+          id: existsUser.id,
+          name: existsUser.name,
+          email: existsUser.email,
+        },
       });
     }
 
@@ -115,7 +122,59 @@ export class UserController implements iController {
   }
 
   async save(req: Request, res: Response): Promise<Response> {
-    throw new Error('Method not implemented.');
+    const { name, email, password, role } = req.body;
+    const { id } = req.params;
+
+    let user: iUser | iUser[] | null;
+    const isNumber: boolean = !isNaN(Number(id));
+
+    if (isNumber) {
+      user = await this.findUseCase.execute(Number(id));
+    } else {
+      user = await this.findByEmailUseCase.execute(id);
+    }
+
+    if (!user) {
+      throw new NotFoundError('User not found');
+    }
+
+    const newUser: iUser = {
+      id: user.id,
+      name: name ? name : user.name,
+      email: email ? email : user.email,
+      password: password ? password : user.password,
+      role: role ? role : user.role,
+    };
+
+    const validationObj = updateUserValidation.safeParse(newUser);
+
+    if (!validationObj.success)
+      throw new BadRequestError(validationObj.error.issues[0].message);
+
+    const existsUser: iUser | null = await this.repository.findByEmail(
+      newUser.email
+    );
+
+    if (existsUser !== null && existsUser.id !== newUser.id) {
+      return res.status(STATUS_CODE.BAD_REQUEST).json({
+        error: 'Exists a User with this email!',
+        result: {
+          id: existsUser.id,
+          name: existsUser.name,
+          email: existsUser.email,
+        },
+      });
+    }
+
+    newUser.password = await generateHash(newUser.password);
+
+    const result = await this.updateUseCase.execute(newUser);
+    return res.status(STATUS_CODE.SUCCESS).json({
+      id: result.id,
+      name: result.name,
+      email: result.email,
+      role: result.role,
+    });
   }
 
   async remove(req: Request, res: Response): Promise<Response> {
