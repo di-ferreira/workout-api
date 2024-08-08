@@ -178,7 +178,26 @@ export class UserController implements iController {
   }
 
   async remove(req: Request, res: Response): Promise<Response> {
-    throw new Error('Method not implemented.');
+    const { id } = req.params;
+
+    let user: iUser | iUser[] | null;
+    const isNumber: boolean = !isNaN(Number(id));
+
+    if (isNumber) {
+      user = await this.findUseCase.execute(Number(id));
+    } else {
+      user = await this.findByEmailUseCase.execute(id);
+    }
+
+    if (!user) {
+      throw new NotFoundError('User not found');
+    }
+
+    await this.removeUseCase.execute(user);
+
+    return res
+      .status(STATUS_CODE.NO_CONTENT)
+      .json({ result: 'user removed with success!' });
   }
 
   async login(req: Request, res: Response): Promise<Response> {
