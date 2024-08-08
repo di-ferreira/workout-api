@@ -1,0 +1,609 @@
+{
+	"info": {
+		"_postman_id": "346198d5-0861-47a7-a3a5-00e667030ba4",
+		"name": "Workout API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "11769221"
+	},
+	"item": [
+		{
+			"name": "Muscle Groups",
+			"item": [
+				{
+					"name": "FindAll",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{$baseURL}}/muscle-groups",
+							"host": [
+								"{{$baseURL}}"
+							],
+							"path": [
+								"muscle-groups"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Equipment",
+			"item": [
+				{
+					"name": "FindAll",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{$baseURL}}/equipments",
+							"host": [
+								"{{$baseURL}}"
+							],
+							"path": [
+								"equipments"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "CREATE",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"dumbbell\",\r\n    \"description_name\": \"halter\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{$baseURL}}/equipments",
+							"host": [
+								"{{$baseURL}}"
+							],
+							"path": [
+								"equipments"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Exercice",
+			"item": [
+				{
+					"name": "Create",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "name",
+									"value": "some exercise 8",
+									"type": "text"
+								},
+								{
+									"key": "description",
+									"value": "some description 8",
+									"type": "text"
+								},
+								{
+									"key": "instructions",
+									"value": "some instruction 8",
+									"type": "text"
+								},
+								{
+									"key": "tips",
+									"value": "some tip 8",
+									"type": "text"
+								},
+								{
+									"key": "muscle_group",
+									"value": "[{\t\t\t\"id\": 1,\t\t\t\"name\": \"pectorals\",\t\t\t\"description_name\": \"peitorais\"\t\t}]",
+									"type": "text"
+								},
+								{
+									"key": "equipment",
+									"value": "[\t{\t\t\t\"id\": 1,\t\t\t\"name\": \"dumbbell\",\t\t\t\"description_name\": \"halter\"\t\t}]",
+									"type": "text"
+								},
+								{
+									"key": "substitutes",
+									"value": "[ {\n        \"name\": \"some exercise 4\",\n        \"description\": \"some description 4\",\n        \"instructions\": \"some instruction 4\",\n        \"tips\": \"some tip 4\",\n        \"images\": [\n            {\n                \"name\": \"some_exercise_4.v1.gif\",\n                \"link\": \"http: //localhost:3000/uploads/images/some_exercise_4.v1.gif\",\n                \"id\": 7\n            },\n            {\n                \"name\": \"some_exercise_4.v2.gif\",\n                \"link\": \"http: //localhost:3000/uploads/images/some_exercise_4.v2.gif\",\n                \"id\": 8\n            },\n            {\n                \"name\": \"some_exercise_4.v3.gif\",\n                \"link\": \"http: //localhost:3000/uploads/images/some_exercise_4.v3.gif\",\n                \"id\": 9\n            }\n        ],\n        \"equipment\": [\n            {\n                \"name\": \"dumbbell\",\n                \"description_name\": \"halter\",\n                \"id\": 1\n            }\n        ],\n        \"muscle_group\": [\n            {\n                \"name\": \"pectorals\",\n                \"description_name\": \"peitorais\",\n                \"id\": 1\n            }\n        ],\n        \"substitutes\": [],\n        \"id\": 4\n    }]",
+									"type": "text"
+								},
+								{
+									"key": "images",
+									"type": "file",
+									"src": "/F:/imagens_exercicios/levantamento_terra.gif"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{$baseURL}}/exercises",
+							"host": [
+								"{{$baseURL}}"
+							],
+							"path": [
+								"exercises"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "name",
+									"value": "some exercise 2",
+									"type": "text"
+								},
+								{
+									"key": "description",
+									"value": "some description 2 updated 3",
+									"type": "text"
+								},
+								{
+									"key": "instructions",
+									"value": "some instruction 2",
+									"type": "text"
+								},
+								{
+									"key": "tips",
+									"value": "some tip 2",
+									"type": "text"
+								},
+								{
+									"key": "muscle_group",
+									"value": "[{\n            \"id\": 1,\n            \"name\": \"pectorals\",\n            \"description_name\": \"peitorais\"\n        }]",
+									"type": "text"
+								},
+								{
+									"key": "equipment",
+									"value": "[\n        {\n            \"id\": 1,\n            \"name\": \"dumbbell\",\n            \"description_name\": \"halter\"\n        }\n    ]",
+									"type": "text"
+								},
+								{
+									"key": "substitutes",
+									"value": "[\n{\n    \"id\": 1,\n    \"name\": \"some exercise\",\n    \"description\": \"some description\",\n    \"instructions\": \"some instruction\",\n    \"tips\": \"some tip\",\n    \"equipment\": [\n        {\n            \"id\": 1,\n            \"name\": \"dumbbell\",\n            \"description_name\": \"halter\"\n        }\n    ],\n    \"muscle_group\": [\n        {\n            \"id\": 1,\n            \"name\": \"pectorals\",\n            \"description_name\": \"peitorais\"\n        }\n    ],\n    \"substitutes\": [],\n    \"images\": [\n        {\n            \"id\": 0,\n            \"name\": \"some_exercise.v3.gif\",\n            \"link\": \"http://localhost:3000/v1/images/some_exercise.v3.gif\"\n        }\n    ]\n},\n{\n    \"id\": 4,\n    \"name\": \"some exercise 4\",\n    \"description\": \"some description 4\",\n    \"instructions\": \"some instruction 4\",\n    \"tips\": \"some tip 4\",\n    \"equipment\": [\n        {\n            \"id\": 1,\n            \"name\": \"dumbbell\",\n            \"description_name\": \"halter\"\n        }\n    ],\n    \"muscle_group\": [\n        {\n            \"id\": 1,\n            \"name\": \"pectorals\",\n            \"description_name\": \"peitorais\"\n        }\n    ],\n    \"substitutes\": [],\n    \"images\": [\n        {\n            \"id\": 7,\n            \"name\": \"some_exercise_4.v1.gif\",\n            \"link\": \"http://localhost:3000/v1/images/some_exercise_4.v1.gif\"\n        },\n        {\n            \"id\": 8,\n            \"name\": \"some_exercise_4.v2.gif\",\n            \"link\": \"http://localhost:3000/v1/images/some_exercise_4.v2.gif\"\n        },\n        {\n            \"id\": 9,\n            \"name\": \"some_exercise_4.v3.gif\",\n            \"link\": \"http://localhost:3000/v1/images/some_exercise_4.v3.gif\"\n        }\n    ]\n}\n]",
+									"type": "text"
+								},
+								{
+									"key": "images",
+									"type": "file",
+									"src": "/F:/imagens_exercicios/rosca_martelo.gif"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{$baseURL}}/exercises/2",
+							"host": [
+								"{{$baseURL}}"
+							],
+							"path": [
+								"exercises",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "FindAll",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{$baseURL}}/exercises",
+							"host": [
+								"{{$baseURL}}"
+							],
+							"path": [
+								"exercises"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "FindByID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{$baseURL}}/exercises/2",
+							"host": [
+								"{{$baseURL}}"
+							],
+							"path": [
+								"exercises",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DELETE",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{$baseURL}}/exercises/6",
+							"host": [
+								"{{$baseURL}}"
+							],
+							"path": [
+								"exercises",
+								"6"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "FindByName",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{$baseURL}}/exercises/none",
+							"host": [
+								"{{$baseURL}}"
+							],
+							"path": [
+								"exercises",
+								"none"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Technics",
+			"item": [
+				{
+					"name": "GET",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{$baseURL}}/technics",
+							"host": [
+								"{{$baseURL}}"
+							],
+							"path": [
+								"technics"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GETByID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{$baseURL}}/technics/2",
+							"host": [
+								"{{$baseURL}}"
+							],
+							"path": [
+								"technics",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "REMOVE",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{$baseURL}}/technics/2",
+							"host": [
+								"{{$baseURL}}"
+							],
+							"path": [
+								"technics",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "CREATE",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\":\"Concentry fail\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{$baseURL}}/technics",
+							"host": [
+								"{{$baseURL}}"
+							],
+							"path": [
+								"technics"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "UPDATE",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n        \"description\": \"remove 20% of weigh\"\r\n    }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{$baseURL}}/technics/1",
+							"host": [
+								"{{$baseURL}}"
+							],
+							"path": [
+								"technics",
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "User",
+			"item": [
+				{
+					"name": "CREATE",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjExIiwiaWF0IjoxNzIzMDY3Mzk0LCJleHAiOjE3MjMxNTM3OTQsInN1YiI6IjExIn0.KRLKHZ_Pwm_QjnVJ9RcMKajayY6nBPWrMXJ3ZQWmNPw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Aquiles 10 Ferreira\",\r\n    \"email\": \"aquiles10.adm@gmail.com\",\r\n    \"password\": \"$secret$\",\r\n    \"role\":\"admin\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{$baseURL}}/users",
+							"host": [
+								"{{$baseURL}}"
+							],
+							"path": [
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "UPDATE",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjEwIiwiaWF0IjoxNzIzMTU3ODU5LCJleHAiOjE3MjMyNDQyNTksInN1YiI6IjEwIn0.L68GubgT811AQy7jBlnlXdSxn5jByjbtj_pLwX8nA00",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\": 3,\r\n    \"name\": \"Aquiles Admin Ferreira\",\r\n    \"email\": \"aquiles.adm@gmail.com\",\r\n    \"password\": \"$secret$\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{$baseURL}}/users/3",
+							"host": [
+								"{{$baseURL}}"
+							],
+							"path": [
+								"users",
+								"3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "LOGIN",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"aquiles.adm@gmail.com\",\r\n    \"password\": \"$secret$\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{$baseURL}}/users/login",
+							"host": [
+								"{{$baseURL}}"
+							],
+							"path": [
+								"users",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "FIND_ALL",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjEwIiwiaWF0IjoxNzIzMTU3ODU5LCJleHAiOjE3MjMyNDQyNTksInN1YiI6IjEwIn0.L68GubgT811AQy7jBlnlXdSxn5jByjbtj_pLwX8nA00",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Aquiles 10 Ferreira\",\r\n    \"email\": \"aquiles10.adm@gmail.com\",\r\n    \"password\": \"$secret$\",\r\n    \"role\":\"admin\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{$baseURL}}/users",
+							"host": [
+								"{{$baseURL}}"
+							],
+							"path": [
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "FIND_ONE",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Aquiles 10 Ferreira\",\r\n    \"email\": \"aquiles10.adm@gmail.com\",\r\n    \"password\": \"$secret$\",\r\n    \"role\":\"admin\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{$baseURL}}/users/diego@gmail.com",
+							"host": [
+								"{{$baseURL}}"
+							],
+							"path": [
+								"users",
+								"diego@gmail.com"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DELETE",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjMiLCJpYXQiOjE3MjMxNTg0OTYsImV4cCI6MTcyMzI0NDg5Niwic3ViIjoiMyJ9.hu3Q1HEsh-P_4nTlFMssYlEP9TmbRkCYI-Db1e2rKko",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Aquiles 10 Ferreira\",\r\n    \"email\": \"aquiles10.adm@gmail.com\",\r\n    \"password\": \"$secret$\",\r\n    \"role\":\"admin\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{$baseURL}}/users/2",
+							"host": [
+								"{{$baseURL}}"
+							],
+							"path": [
+								"users",
+								"2"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "$baseURL",
+			"value": "http://localhost:3000/v1/"
+		}
+	]
+}

@@ -10,8 +10,6 @@ async function VerifyAuth(req: Request, res: Response, next: NextFunction) {
   const { role } = req.body;
   const method = req.method;
 
-  console.log('method: ' + method);
-
   if (!authorization) throw new UnauthorizedError('User Unauthorized!');
 
   const [_, accessToken] = authorization.split(' ');
