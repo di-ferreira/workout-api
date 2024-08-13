@@ -16,9 +16,9 @@ export interface iSeries {
 }
 
 export interface iCreateSeries {
-  exercise: iExercise | iExercise[];
+  exercise: iExercise[];
   maximum_reps: number;
   minimum_reps: number;
-  technics?: iTechnic | iTechnic[];
+  technics: iTechnic[];
   sets: iSet[];
 }

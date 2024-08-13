@@ -10,7 +10,10 @@ import EquipmentEntity from './Entities/Equipment';
 import ExerciseEntity from './Entities/Exercise';
 import ImageExerciseEntity from './Entities/ImageExercise';
 import MuscleGroupEntity from './Entities/MuscleGroup';
+import SeriesEntity from './Entities/Series';
+import SetEntity from './Entities/Sets';
 import TechnicEntity from './Entities/Technic';
+import TrainingEntity from './Entities/Training';
 import UserEntity from './Entities/User';
 
 const EntityClasses: MixedList<Function | string | EntitySchema> = [
@@ -19,6 +22,9 @@ const EntityClasses: MixedList<Function | string | EntitySchema> = [
   ImageExerciseEntity,
   ExerciseEntity,
   TechnicEntity,
+  TrainingEntity,
+  SeriesEntity,
+  SetEntity,
   UserEntity,
 ];
 
