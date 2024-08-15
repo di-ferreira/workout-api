@@ -1,4 +1,4 @@
-import { iSeries } from './iSerie';
+import { iCreateSeries, iSeries } from './iSerie';
 
 export interface iTraining extends iCreateTraining {
   id: number;
@@ -6,5 +6,5 @@ export interface iTraining extends iCreateTraining {
 
 export interface iCreateTraining {
   name: string;
-  series: iSeries[];
+  series: iSeries[] | iCreateSeries[];
 }

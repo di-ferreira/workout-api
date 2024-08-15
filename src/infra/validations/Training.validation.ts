@@ -1,6 +1,10 @@
 import { z } from 'zod';
 import { ERROR_MESSAGE } from '../../@types';
 import { iCreateTraining, iTraining } from '../../core/Entities/iTraining';
+import {
+  createSeriesValidation,
+  updateSeriesValidation,
+} from './Series.validation';
 
 export const createTrainingValidation: z.ZodType<iCreateTraining> = z.object({
   name: z
@@ -10,12 +14,9 @@ export const createTrainingValidation: z.ZodType<iCreateTraining> = z.object({
     })
     .trim()
     .min(2, { message: `2 ${ERROR_MESSAGE.MINIMUM_LENGTH_ERROR}` }),
-  series: z.array(
-    z.union([createExerciseValidation, updateExerciseValidation]),
-    {
-      message: `Training ${ERROR_MESSAGE.INVALID_TYPE_ERROR} array of Training`,
-    }
-  ),
+  series: z.array(z.union([createSeriesValidation, updateSeriesValidation]), {
+    message: `Training ${ERROR_MESSAGE.INVALID_TYPE_ERROR} array of Training`,
+  }),
 });
 
 export const updateTrainingValidation: z.ZodType<iTraining> = z.object({
@@ -30,12 +31,9 @@ export const updateTrainingValidation: z.ZodType<iTraining> = z.object({
     })
     .trim()
     .min(2, { message: `2 ${ERROR_MESSAGE.MINIMUM_LENGTH_ERROR}` }),
-  series: z.array(
-    z.union([createExerciseValidation, updateExerciseValidation]),
-    {
-      message: `Training ${ERROR_MESSAGE.INVALID_TYPE_ERROR} array of Training`,
-    }
-  ),
+  series: z.array(z.union([createSeriesValidation, updateSeriesValidation]), {
+    message: `Training ${ERROR_MESSAGE.INVALID_TYPE_ERROR} array of Training`,
+  }),
 });
 
 export type createTrainingValidationRepository = z.infer<

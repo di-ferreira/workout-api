@@ -1,7 +1,7 @@
 import { iExercise } from './iExercise';
 import { iTechnic } from './iTechnic';
 
-export interface iSet {
+export interface iSet extends iCreateSet {
   id: number;
 }
 
@@ -11,7 +11,7 @@ export interface iCreateSet {
   rest?: number;
 }
 
-export interface iSeries {
+export interface iSeries extends iCreateSeries {
   id: number;
 }
 
@@ -20,5 +20,5 @@ export interface iCreateSeries {
   maximum_reps: number;
   minimum_reps: number;
   technics: iTechnic[];
-  sets: iSet[];
+  sets: iSet[] | iCreateSet[];
 }
