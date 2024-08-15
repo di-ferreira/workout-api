@@ -46,7 +46,7 @@ export class UserController implements iController {
   }
 
   async create(req: Request, res: Response): Promise<Response> {
-    const { name, email, password, role } = req.body;
+    const { name, email, password, role, trainings } = req.body;
 
     const newUser: iUser = {
       id: 0,
@@ -54,6 +54,7 @@ export class UserController implements iController {
       email,
       password,
       role: role ? role : 'user',
+      trainings: trainings ? trainings : [],
     };
 
     const validationObj = createUserValidation.safeParse(newUser);
@@ -122,7 +123,7 @@ export class UserController implements iController {
   }
 
   async save(req: Request, res: Response): Promise<Response> {
-    const { name, email, password, role } = req.body;
+    const { name, email, password, role, trainings } = req.body;
     const { id } = req.params;
 
     let user: iUser | iUser[] | null;
@@ -144,6 +145,7 @@ export class UserController implements iController {
       email: email ? email : user.email,
       password: password ? password : user.password,
       role: role ? role : user.role,
+      trainings: trainings ? trainings : [],
     };
 
     const validationObj = updateUserValidation.safeParse(newUser);

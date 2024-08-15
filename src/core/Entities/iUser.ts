@@ -1,4 +1,4 @@
-import { iTraining } from './iTraining';
+import { iCreateTraining, iTraining } from './iTraining';
 
 export interface iUser extends iCreateUser {
   id: number;
@@ -13,5 +13,5 @@ export interface iCreateUser {
   email: string;
   password: string;
   role: iUserRole;
-  trainings: iTraining[];
+  trainings?: iTraining[] | iCreateTraining[];
 }

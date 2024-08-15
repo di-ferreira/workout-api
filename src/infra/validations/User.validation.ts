@@ -1,6 +1,10 @@
 import { z } from 'zod';
 import { ERROR_MESSAGE } from '../../@types';
 import { aUserRole, iCreateUser, iUser } from '../../core/Entities/iUser';
+import {
+  createTrainingValidation,
+  updateTrainingValidation,
+} from './Training.validation';
 
 export const createUserValidation: z.ZodType<iCreateUser> = z.object({
   name: z
@@ -29,6 +33,11 @@ export const createUserValidation: z.ZodType<iCreateUser> = z.object({
       ' | '
     )}`,
   }),
+  trainings: z
+    .array(z.union([createTrainingValidation, updateTrainingValidation]), {
+      message: `Training ${ERROR_MESSAGE.INVALID_TYPE_ERROR} array of Training`,
+    })
+    .optional(),
 });
 
 export const updateUserValidation: z.ZodType<iUser> = z.object({
@@ -62,6 +71,11 @@ export const updateUserValidation: z.ZodType<iUser> = z.object({
       ' | '
     )}`,
   }),
+  trainings: z
+    .array(z.union([createTrainingValidation, updateTrainingValidation]), {
+      message: `Training ${ERROR_MESSAGE.INVALID_TYPE_ERROR} array of Training`,
+    })
+    .optional(),
 });
 
 export type createUserValidationRepository = z.infer<
