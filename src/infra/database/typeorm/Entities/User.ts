@@ -1,5 +1,13 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinTable,
+  ManyToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+import { iTraining } from '../../../../core/Entities/iTraining';
 import { aUserRole, iUser, iUserRole } from '../../../../core/Entities/iUser';
+import TrainingEntity from './Training';
 
 @Entity('user')
 class UserEntity implements iUser {
@@ -18,6 +26,10 @@ class UserEntity implements iUser {
   // @Column({ type: 'enum', enum: aUserRole, default: ['user'], length: 150 })
   @Column({ type: 'varchar', enum: aUserRole, default: 'user', length: 150 })
   role!: iUserRole;
+
+  @ManyToMany(() => TrainingEntity, { cascade: ['insert', 'update', 'remove'] })
+  @JoinTable()
+  trainings!: iTraining[];
 }
 
 export default UserEntity;

@@ -59,6 +59,7 @@ export class UserRepository implements iUserRepository {
       email: user.email,
       password: user.password,
       role: user.role,
+      trainings: user.trainings,
     });
     const result = await this.CustomRepository.save(newUser);
     return result;
@@ -71,6 +72,7 @@ export class UserRepository implements iUserRepository {
       email: user.email,
       password: user.password,
       role: user.role,
+      trainings: user.trainings,
     });
     return result;
   }

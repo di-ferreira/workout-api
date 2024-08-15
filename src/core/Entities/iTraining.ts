@@ -1,6 +1,6 @@
 import { iSeries } from './iSerie';
 
-export interface iTraining {
+export interface iTraining extends iCreateTraining {
   id: number;
 }
 
