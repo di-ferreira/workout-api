@@ -9,6 +9,8 @@ export interface iTrainingRepository {
 
   findByUser(user: iUser): Promise<iTraining[]>;
 
+  findByName(trainingName: string): Promise<iTraining[]>;
+
   createTraining(training: iTraining): Promise<iTraining>;
 
   saveTraining(training: iTraining): Promise<iTraining>;

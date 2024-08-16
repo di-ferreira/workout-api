@@ -52,9 +52,18 @@ export class TrainingRepository implements iTrainingRepository {
     return userTraining ? userTraining.trainings : [];
   }
 
+  async findByName(trainingName: string): Promise<iTraining[]> {
+    const training = await this.CustomRepository.findBy([
+      {
+        name: trainingName,
+      },
+    ]);
+
+    return training;
+  }
+
   async createTraining(training: iTraining): Promise<iTraining> {
     const newTraining = this.CustomRepository.create({
-      id: training.id,
       name: training.name,
       series: training.series,
     });
