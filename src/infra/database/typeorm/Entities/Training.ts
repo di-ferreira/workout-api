@@ -14,6 +14,7 @@ class TrainingEntity implements iTraining {
   @OneToMany(() => SeriesEntity, (serie) => serie.training, {
     cascade: ['insert'],
     onDelete: 'CASCADE',
+    eager: true,
   })
   series!: iSeries[];
 }

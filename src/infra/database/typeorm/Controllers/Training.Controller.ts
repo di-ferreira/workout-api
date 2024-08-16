@@ -10,7 +10,7 @@ import FindTrainingByUserUseCase from '../../../../core/UseCases/Training/FindTr
 import ListTrainingUseCase from '../../../../core/UseCases/Training/ListTrainingUseCase';
 import RemoveTrainingUseCase from '../../../../core/UseCases/Training/RemoveTrainingUseCase';
 import UpdateTrainingUseCase from '../../../../core/UseCases/Training/UpdateTrainingUseCase';
-import { BadRequestError } from '../../../helpers/ApiErrors';
+import { BadRequestError, NotFoundError } from '../../../helpers/ApiErrors';
 import { createTrainingValidation } from '../../../validations/Training.validation';
 
 export class TrainingController implements iController {
@@ -38,11 +38,36 @@ export class TrainingController implements iController {
   }
 
   async list(req: Request, res: Response): Promise<Response> {
-    throw new Error('Method not implemented.');
+    const { page, limit } = req.query;
+    const listTraining = await this.listUseCase.execute({
+      page: Number(page),
+      limit: Number(limit),
+    });
+
+    if (listTraining.total_registers === 0) {
+      return res.status(STATUS_CODE.NO_CONTENT).json(listTraining);
+    }
+
+    return res.status(STATUS_CODE.SUCCESS).json(listTraining);
   }
 
   async show(req: Request, res: Response): Promise<Response> {
-    throw new Error('Method not implemented.');
+    const { id } = req.params;
+
+    let training: iTraining | iTraining[] | null;
+    const isNumber: boolean = !isNaN(Number(id));
+
+    if (isNumber) {
+      training = await this.findUseCase.execute(Number(id));
+    } else {
+      training = await this.repository.findByName(id);
+    }
+
+    if (!training) {
+      throw new NotFoundError('Training not found');
+    }
+
+    return res.status(STATUS_CODE.SUCCESS).json(training);
   }
 
   async create(req: Request, res: Response): Promise<Response> {

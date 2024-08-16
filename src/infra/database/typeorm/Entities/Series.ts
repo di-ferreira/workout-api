@@ -21,7 +21,9 @@ class SeriesEntity implements iSeries {
   @PrimaryGeneratedColumn('increment')
   id!: number;
 
-  @ManyToMany(() => ExerciseEntity)
+  @ManyToMany(() => ExerciseEntity, {
+    eager: true,
+  })
   @JoinTable()
   exercise!: iExercise[];
 
@@ -31,13 +33,16 @@ class SeriesEntity implements iSeries {
   @Column({ type: 'int' })
   minimum_reps!: number;
 
-  @ManyToMany(() => TechnicEntity)
+  @ManyToMany(() => TechnicEntity, {
+    eager: true,
+  })
   @JoinTable()
   technics!: iTechnic[];
 
   @OneToMany(() => SetEntity, (set) => set.serie, {
     cascade: ['insert'],
     onDelete: 'CASCADE',
+    eager: true,
   })
   sets!: iSet[];
 
