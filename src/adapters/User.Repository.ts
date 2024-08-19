@@ -32,7 +32,14 @@ export class UserRepository implements iUserRepository {
   }
 
   async findById(id: number): Promise<iUser | null> {
-    return await this.CustomRepository.findOneBy({ id });
+    return await this.CustomRepository.findOne({
+      where: {
+        id: id,
+      },
+      relations: {
+        trainings: true,
+      },
+    });
   }
 
   async findByEmail(email: string): Promise<iUser | null> {
@@ -40,17 +47,23 @@ export class UserRepository implements iUserRepository {
       where: {
         email: email,
       },
+      relations: {
+        trainings: true,
+      },
     });
 
     return result;
   }
 
   async findByName(name: string): Promise<iUser[]> {
-    return await this.CustomRepository.findBy([
-      {
+    return await this.CustomRepository.find({
+      relations: {
+        trainings: true,
+      },
+      where: {
         name: Like(`%${name}%`),
       },
-    ]);
+    });
   }
 
   async createUser(user: iUser): Promise<iUser> {

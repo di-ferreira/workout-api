@@ -27,7 +27,7 @@ export const createUserValidation: z.ZodType<iCreateUser> = z.object({
       required_error: `Password ${ERROR_MESSAGE.REQUIRED_ERROR}`,
     })
     .trim()
-    .min(8, { message: `8 ${ERROR_MESSAGE.MINIMUM_LENGTH_ERROR}` }),
+    .min(8, { message: `Password 8 ${ERROR_MESSAGE.MINIMUM_LENGTH_ERROR}` }),
   role: z.enum(aUserRole, {
     invalid_type_error: `the Role field does not have any of the values ${aUserRole.join(
       ' | '
@@ -65,7 +65,7 @@ export const updateUserValidation: z.ZodType<iUser> = z.object({
       required_error: `Password ${ERROR_MESSAGE.REQUIRED_ERROR}`,
     })
     .trim()
-    .min(8, { message: `8 ${ERROR_MESSAGE.MINIMUM_LENGTH_ERROR}` }),
+    .min(8, { message: `Password 8 ${ERROR_MESSAGE.MINIMUM_LENGTH_ERROR}` }),
   role: z.enum(aUserRole, {
     invalid_type_error: `the Role field does not have any of the values ${aUserRole.join(
       ' | '

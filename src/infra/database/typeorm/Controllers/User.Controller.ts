@@ -176,6 +176,7 @@ export class UserController implements iController {
       name: result.name,
       email: result.email,
       role: result.role,
+      trainings: result.trainings,
     });
   }
 
