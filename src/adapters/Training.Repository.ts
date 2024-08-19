@@ -22,7 +22,18 @@ export class TrainingRepository implements iTrainingRepository {
     const queryPage: number = page ? page : 1;
     const queryLimit: number = limit ? limit : 10;
 
-    const [trainings, count] = await this.CustomRepository.createQueryBuilder()
+    const [trainings, count] = await this.CustomRepository.createQueryBuilder(
+      'training'
+    )
+      .where((qb) => {
+        const subQuery = qb
+          .subQuery()
+          .select('training_user.trainingId')
+          .from('user_trainings_training', 'training_user')
+          .where('training_user.trainingId = training.id')
+          .getQuery();
+        return `NOT EXISTS ${subQuery}`;
+      })
       .skip(queryLimit * (queryPage - 1))
       .take(queryLimit)
       .getManyAndCount();
