@@ -11,7 +11,10 @@ import ListTrainingUseCase from '../../../../core/UseCases/Training/ListTraining
 import RemoveTrainingUseCase from '../../../../core/UseCases/Training/RemoveTrainingUseCase';
 import UpdateTrainingUseCase from '../../../../core/UseCases/Training/UpdateTrainingUseCase';
 import { BadRequestError, NotFoundError } from '../../../helpers/ApiErrors';
-import { createTrainingValidation } from '../../../validations/Training.validation';
+import {
+  createTrainingValidation,
+  updateTrainingValidation,
+} from '../../../validations/Training.validation';
 
 export class TrainingController implements iController {
   private listUseCase: ListTrainingUseCase;
@@ -99,7 +102,45 @@ export class TrainingController implements iController {
   }
 
   async save(req: Request, res: Response): Promise<Response> {
-    throw new Error('Method not implemented.');
+    const { id } = req.params;
+    let training: iTraining | null = null;
+    const isNumber: boolean = !isNaN(Number(id));
+
+    if (isNumber) {
+      training = await this.findUseCase.execute(Number(id));
+    } else {
+      throw new BadRequestError('Parameter ID is not a number!');
+    }
+
+    if (training === null) {
+      throw new NotFoundError('Training not found');
+    }
+
+    const { name, series } = req.body;
+    const newTraining: iTraining = {
+      id: training.id,
+      name: name ? name : training.name,
+      series: series ? series : training.series,
+    };
+
+    const validationObj = updateTrainingValidation.safeParse(newTraining);
+
+    if (!validationObj.success)
+      throw new BadRequestError(validationObj.error.issues[0].message);
+
+    const existsTraining: iTraining[] = (
+      await this.repository.findByName(newTraining.name)
+    ).filter((training) => training.id !== newTraining.id);
+
+    if (existsTraining.length > 0) {
+      return res.status(STATUS_CODE.BAD_REQUEST).json({
+        error: 'Exists Training with this name!',
+        result: existsTraining,
+      });
+    }
+
+    const result = await this.createUseCase.execute(newTraining);
+    return res.status(STATUS_CODE.CREATED).json({ result });
   }
 
   async remove(req: Request, res: Response): Promise<Response> {
