@@ -139,11 +139,28 @@ export class TrainingController implements iController {
       });
     }
 
-    const result = await this.createUseCase.execute(newTraining);
+    const result = await this.updateUseCase.execute(newTraining);
     return res.status(STATUS_CODE.CREATED).json({ result });
   }
 
   async remove(req: Request, res: Response): Promise<Response> {
-    throw new Error('Method not implemented.');
+    const { id } = req.params;
+
+    let training: iTraining | null = null;
+    const isNumber: boolean = !isNaN(Number(id));
+
+    if (isNumber) {
+      training = await this.findUseCase.execute(Number(id));
+    }
+
+    if (training === null) {
+      throw new NotFoundError('Training not found');
+    }
+
+    await this.removeUseCase.execute(training);
+
+    return res
+      .status(STATUS_CODE.NO_CONTENT)
+      .json({ result: 'Training removed with success!' });
   }
 }
