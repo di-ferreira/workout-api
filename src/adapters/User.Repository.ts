@@ -16,7 +16,11 @@ export class UserRepository implements iUserRepository {
     const queryPage: number = page ? page : 1;
     const queryLimit: number = limit ? limit : 10;
 
-    const [users, count] = await this.CustomRepository.createQueryBuilder()
+    const [users, count] = await this.CustomRepository.createQueryBuilder(
+      'user'
+    )
+      .select(['user.id', 'user.name', 'user.email', 'user.role'])
+      .leftJoinAndSelect('user.trainings', 'training')
       .skip(queryLimit * (queryPage - 1))
       .take(queryLimit)
       .getManyAndCount();

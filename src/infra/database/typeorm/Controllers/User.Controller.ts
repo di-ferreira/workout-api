@@ -119,7 +119,13 @@ export class UserController implements iController {
       throw new NotFoundError('User not found');
     }
 
-    return res.status(STATUS_CODE.SUCCESS).json(user);
+    return res.status(STATUS_CODE.SUCCESS).json({
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      trainings: user.trainings ? user.trainings : [],
+    });
   }
 
   async save(req: Request, res: Response): Promise<Response> {
